@@ -14,6 +14,7 @@ import { HospitalProfileModule } from './modules/hospital-profile/hospital-profi
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
 import { MessagesModule } from './modules/messages/messages.module';
+import { UserAuthModule } from './modules/user-auth/user-auth.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MessagesModule } from './modules/messages/messages.module';
     JobsModule,
     ApplicationsModule,
     MessagesModule,
+    UserAuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
