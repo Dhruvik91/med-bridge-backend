@@ -19,13 +19,16 @@ export class FailureResponseTransformer implements ExceptionFilter {
     const response: Response = ctx.getResponse<Response>();
     const status = exception.getStatus();
     const errorData: ErrorData = exception.getResponse() as ErrorData;
+    const messageArray =
+      typeof errorData.message === 'string'
+        ? [errorData.message]
+        : errorData.message;
 
     const result = {
-      ...errorData,
-      message:
-        typeof errorData.message === 'string'
-          ? [errorData.message]
-          : errorData.message,
+      data: null,
+      message: messageArray,
+      error: errorData.error,
+      statusCode: status,
       isError: true,
     };
 

@@ -5,12 +5,15 @@ import {
   ApiBearerAuth,
   ApiTags,
   ApiOperation,
-  ApiOkResponse,
-  ApiCreatedResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
+import {
+  ApiCreatedResponseEnvelope,
+  ApiOkResponseEnvelope,
+  EmptyResponseDto,
+} from '../../core/swagger/response-envelope';
 
 @ApiTags('Applications')
 @ApiBearerAuth()
@@ -20,14 +23,14 @@ export class ApplicationsController {
 
   @Get()
   @ApiOperation({ summary: 'List all applications' })
-  @ApiOkResponse({ type: Application, isArray: true })
+  @ApiOkResponseEnvelope(Application, true)
   findAll(): Promise<Application[]> {
     return this.service.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get application by ID' })
-  @ApiOkResponse({ type: Application })
+  @ApiOkResponseEnvelope(Application)
   @ApiNotFoundResponse({ description: 'Application not found' })
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
@@ -35,28 +38,28 @@ export class ApplicationsController {
 
   @Get('doctor/:doctorId')
   @ApiOperation({ summary: 'List applications for a doctor' })
-  @ApiOkResponse({ type: Application, isArray: true })
+  @ApiOkResponseEnvelope(Application, true)
   findByDoctor(@Param('doctorId') doctorId: string) {
     return this.service.findByDoctor(doctorId);
   }
 
   @Get('job/:jobId')
   @ApiOperation({ summary: 'List applications for a job' })
-  @ApiOkResponse({ type: Application, isArray: true })
+  @ApiOkResponseEnvelope(Application, true)
   findByJob(@Param('jobId') jobId: string) {
     return this.service.findByJob(jobId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new application' })
-  @ApiCreatedResponse({ type: Application })
+  @ApiCreatedResponseEnvelope(Application)
   create(@Body() dto: CreateApplicationDto) {
     return this.service.create(dto);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update an application' })
-  @ApiOkResponse({ type: Application })
+  @ApiOkResponseEnvelope(Application)
   @ApiNotFoundResponse({ description: 'Application not found' })
   update(@Param('id') id: string, @Body() dto: UpdateApplicationDto) {
     return this.service.update(id, dto);
@@ -64,7 +67,7 @@ export class ApplicationsController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an application' })
-  @ApiOkResponse({ description: 'Application removed successfully' })
+  @ApiOkResponseEnvelope(EmptyResponseDto)
   remove(@Param('id') id: string) {
     return this.service.remove(id);
   }

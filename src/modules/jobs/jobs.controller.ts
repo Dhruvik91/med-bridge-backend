@@ -5,12 +5,15 @@ import {
   ApiBearerAuth,
   ApiTags,
   ApiOperation,
-  ApiOkResponse,
-  ApiCreatedResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import {
+  ApiCreatedResponseEnvelope,
+  ApiOkResponseEnvelope,
+  EmptyResponseDto,
+} from '../../core/swagger/response-envelope';
 
 @ApiTags('Jobs')
 @ApiBearerAuth()
@@ -20,14 +23,14 @@ export class JobsController {
 
   @Get()
   @ApiOperation({ summary: 'List all jobs' })
-  @ApiOkResponse({ type: Job, isArray: true })
+  @ApiOkResponseEnvelope(Job, true)
   findAll(): Promise<Job[]> {
     return this.service.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get job by ID' })
-  @ApiOkResponse({ type: Job })
+  @ApiOkResponseEnvelope(Job)
   @ApiNotFoundResponse({ description: 'Job not found' })
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
@@ -35,21 +38,21 @@ export class JobsController {
 
   @Get('hospital/:hospitalId')
   @ApiOperation({ summary: 'List jobs for a hospital' })
-  @ApiOkResponse({ type: Job, isArray: true })
+  @ApiOkResponseEnvelope(Job, true)
   findByHospital(@Param('hospitalId') hospitalId: string) {
     return this.service.findByHospital(hospitalId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new job' })
-  @ApiCreatedResponse({ type: Job })
+  @ApiCreatedResponseEnvelope(Job)
   create(@Body() dto: CreateJobDto) {
     return this.service.create(dto);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a job' })
-  @ApiOkResponse({ type: Job })
+  @ApiOkResponseEnvelope(Job)
   @ApiNotFoundResponse({ description: 'Job not found' })
   update(@Param('id') id: string, @Body() dto: UpdateJobDto) {
     return this.service.update(id, dto);
@@ -57,7 +60,7 @@ export class JobsController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a job' })
-  @ApiOkResponse({ description: 'Job removed successfully' })
+  @ApiOkResponseEnvelope(EmptyResponseDto)
   remove(@Param('id') id: string) {
     return this.service.remove(id);
   }

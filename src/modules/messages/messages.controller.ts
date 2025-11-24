@@ -5,10 +5,9 @@ import {
   ApiBearerAuth,
   ApiTags,
   ApiOperation,
-  ApiOkResponse,
-  ApiCreatedResponse,
 } from '@nestjs/swagger';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { ApiCreatedResponseEnvelope, ApiOkResponseEnvelope } from '../../core/swagger/response-envelope';
 
 @ApiTags('Messages')
 @ApiBearerAuth()
@@ -18,14 +17,14 @@ export class MessagesController {
 
   @Get('user/:userId')
   @ApiOperation({ summary: 'List all messages for a user' })
-  @ApiOkResponse({ type: Message, isArray: true })
+  @ApiOkResponseEnvelope(Message, true)
   findAllForUser(@Param('userId') userId: string): Promise<Message[]> {
     return this.service.findAllForUser(userId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Send a message' })
-  @ApiCreatedResponse({ type: Message })
+  @ApiCreatedResponseEnvelope(Message)
   send(@Body() dto: CreateMessageDto) {
     return this.service.send(dto);
   }
