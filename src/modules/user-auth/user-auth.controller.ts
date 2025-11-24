@@ -3,18 +3,36 @@ import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { UserAuthService } from './user-auth.service';
 import { UserRole } from '../../database/entities/enums';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
+class SignupDto {
+  email: string;
+  password: string;
+  role: UserRole;
+  name?: string;
+}
+
+@ApiTags('User Auth')
 @Controller('user-auth')
 export class UserAuthController {
   constructor(private readonly auth: UserAuthService) {}
 
   @Post('signup')
-  async signup(@Body() body: { email: string; password: string; role: UserRole; name?: string }) {
+  @ApiOperation({ summary: 'Sign up a new user (doctor/hospital)' })
+  @ApiCreatedResponse({ description: 'User registered and JWT returned' })
+  async signup(@Body() body: SignupDto) {
     return this.auth.signup(body.email, body.password, body.role, body.name);
   }
 
   @UseGuards(AuthGuard('local-user'))
   @Post('login')
+  @ApiOperation({ summary: 'Login user and return JWT' })
+  @ApiOkResponse({ description: 'Successfully authenticated, returns JWT token' })
   async login(@Req() req: Request) {
     // req.user is set by Local Strategy
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,6 +42,8 @@ export class UserAuthController {
 
   @UseGuards(AuthGuard('jwt-user'))
   @Get('me')
+  @ApiOperation({ summary: 'Get current authenticated user profile' })
+  @ApiOkResponse({ description: 'Returns user information for current JWT' })
   async me(@Req() req: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload = (req as any).user as { id: string };
@@ -33,6 +53,7 @@ export class UserAuthController {
   // Initiate Google OAuth
   @Get('google')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Initiate Google OAuth login flow' })
   async googleAuth() {
     return;
   }
@@ -40,6 +61,7 @@ export class UserAuthController {
   // Google OAuth callback
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Handle Google OAuth callback and redirect with JWT' })
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const profile = (req as any).user as { email: string; name?: string };

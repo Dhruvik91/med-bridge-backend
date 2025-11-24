@@ -5,6 +5,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { SuccessResponseTransformer } from './core/interceptor/success-response-interceptor';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './modules/auth/Guards/jwt-guard';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,6 +25,16 @@ async function bootstrap() {
   );
 
   app.useGlobalGuards(new JwtAuthGuard(reflector));
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Med Bridge API')
+    .setDescription('API documentation for the Med Bridge backend')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document);
 
   const PORT = config.get<number>('PORT');
 

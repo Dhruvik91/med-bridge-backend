@@ -1,6 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Dashboard')
+@ApiBearerAuth()
 @Controller('dashboard')
 export class AppController {
   constructor(private readonly appService: AppService) {}
