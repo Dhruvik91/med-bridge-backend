@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { UserAuthService } from './user-auth.service';
 import { UserRole } from '../../database/entities/enums';
+import { AllowUnauthorized } from '../auth/unauthorized/allow-unauthorixed';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -22,6 +23,7 @@ class SignupDto {
 export class UserAuthController {
   constructor(private readonly auth: UserAuthService) {}
 
+  @AllowUnauthorized()
   @Post('signup')
   @ApiOperation({ summary: 'Sign up a new user (doctor/hospital)' })
   @ApiCreatedResponse({ description: 'User registered and JWT returned' })
@@ -29,6 +31,7 @@ export class UserAuthController {
     return this.auth.signup(body.email, body.password, body.role, body.name);
   }
 
+  @AllowUnauthorized()
   @UseGuards(AuthGuard('local-user'))
   @Post('login')
   @ApiOperation({ summary: 'Login user and return JWT' })
@@ -51,6 +54,7 @@ export class UserAuthController {
   }
 
   // Initiate Google OAuth
+  @AllowUnauthorized()
   @Get('google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Initiate Google OAuth login flow' })
@@ -59,6 +63,7 @@ export class UserAuthController {
   }
 
   // Google OAuth callback
+  @AllowUnauthorized()
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Handle Google OAuth callback and redirect with JWT' })
