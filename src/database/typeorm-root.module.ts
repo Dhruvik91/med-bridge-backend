@@ -16,7 +16,7 @@ import { AllEntities } from '.';
         database: configService.get<string>('DB_NAME'),
         entities: AllEntities,
         synchronize: true,
-        logging: true,
+        logging: false,
       }),
       inject: [ConfigService],
     }),

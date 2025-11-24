@@ -7,7 +7,6 @@ import { AppService } from './app.service';
 import { TypeOrmConnectionModule } from './database/typeorm-root.module';
 import { DatabaseModule } from './database/database.module';
 
-import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { DoctorProfileModule } from './modules/doctor-profile/doctor-profile.module';
 import { HospitalProfileModule } from './modules/hospital-profile/hospital-profile.module';
@@ -21,7 +20,6 @@ import { UserAuthModule } from './modules/user-auth/user-auth.module';
     TypeOrmConnectionModule,
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
-    AuthModule,
     UsersModule,
     DoctorProfileModule,
     HospitalProfileModule,
