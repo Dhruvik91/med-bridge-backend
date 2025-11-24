@@ -5,7 +5,7 @@ import { Reflector } from '@nestjs/core';
 import { ALLOW_UNAUTHORIZED_KEY } from '../unauthorized/allow-unauthorixed';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
+export class JwtAuthGuard extends AuthGuard('jwt-user') {
   constructor(private readonly reflector: Reflector) {
     super();
   }

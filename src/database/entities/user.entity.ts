@@ -1,13 +1,14 @@
-import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserRole } from './enums';
 import { DoctorProfile } from './doctor-profile.entity';
 import { HospitalProfile } from './hospital-profile.entity';
 import { Message } from './message.entity';
 import { Notification } from './notification.entity';
+import { UUID } from 'crypto';
 
 @Entity({ name: 'users', schema: 'public' })
 export class User {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'text', unique: true })
