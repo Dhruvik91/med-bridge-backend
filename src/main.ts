@@ -12,6 +12,25 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   const config = app.get(ConfigService);
 
+  app.enableCors({
+    origin: (origin, callback) => {
+      const allowed = config.get<string>('CORS_ORIGIN');
+      if (!allowed) {
+        callback(null, true);
+        return;
+      }
+      const list = allowed.split(',').map((o) => o.trim());
+      if (!origin || list.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'), false);
+      }
+    },
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization',
+  });
+
   app.useGlobalFilters(new FailureResponseTransformer());
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(reflector),
