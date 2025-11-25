@@ -9,10 +9,12 @@ import { DatabaseModule } from './database/database.module';
 
 import { UsersModule } from './modules/users/users.module';
 import { DoctorProfileModule } from './modules/doctor-profile/doctor-profile.module';
-import { HospitalProfileModule } from './modules/hospital-profile/hospital-profile.module';
+// MVP: jobs + applications support job search & apply
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
-import { MessagesModule } from './modules/messages/messages.module';
+// MVP: temporarily hide hospital profile & messaging APIs
+// import { HospitalProfileModule } from './modules/hospital-profile/hospital-profile.module';
+// import { MessagesModule } from './modules/messages/messages.module';
 import { UserAuthModule } from './modules/user-auth/user-auth.module';
 
 @Module({
@@ -22,10 +24,11 @@ import { UserAuthModule } from './modules/user-auth/user-auth.module';
     DatabaseModule,
     UsersModule,
     DoctorProfileModule,
-    HospitalProfileModule,
+    // MVP: only expose doctor profile, job search, and job applications
     JobsModule,
     ApplicationsModule,
-    MessagesModule,
+    // HospitalProfileModule,
+    // MessagesModule,
     UserAuthModule,
   ],
   controllers: [AppController],
