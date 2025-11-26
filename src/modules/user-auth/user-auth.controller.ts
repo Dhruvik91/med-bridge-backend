@@ -15,7 +15,6 @@ class SignupDto {
   email: string;
   password: string;
   role: UserRole;
-  name?: string;
 }
 
 @ApiTags('User Auth')
@@ -25,10 +24,10 @@ export class UserAuthController {
 
   @AllowUnauthorized()
   @Post('signup')
-  @ApiOperation({ summary: 'Sign up a new user (doctor/hospital)' })
+  @ApiOperation({ summary: 'Sign up a new user (candidate/employer)' })
   @ApiCreatedResponse({ description: 'User registered and JWT returned' })
   async signup(@Body() body: SignupDto) {
-    return this.auth.signup(body.email, body.password, body.role, body.name);
+    return this.auth.signup(body.email, body.password, body.role);
   }
 
   @AllowUnauthorized()
