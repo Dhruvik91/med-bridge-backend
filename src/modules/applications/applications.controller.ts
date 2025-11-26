@@ -36,11 +36,11 @@ export class ApplicationsController {
     return this.service.findOne(id);
   }
 
-  @Get('doctor/:doctorId')
-  @ApiOperation({ summary: 'List applications for a doctor' })
+  @Get('candidate/:candidateId')
+  @ApiOperation({ summary: 'List applications for a candidate' })
   @ApiOkResponseEnvelope(Application, true)
-  findByDoctor(@Param('doctorId') doctorId: string) {
-    return this.service.findByDoctor(doctorId);
+  findByCandidate(@Param('candidateId') candidateId: string) {
+    return this.service.findByCandidate(candidateId);
   }
 
   @Get('job/:jobId')
@@ -63,6 +63,22 @@ export class ApplicationsController {
   @ApiNotFoundResponse({ description: 'Application not found' })
   update(@Param('id') id: string, @Body() dto: UpdateApplicationDto) {
     return this.service.update(id, dto);
+  }
+
+  @Post(':id/withdraw')
+  @ApiOperation({ summary: 'Withdraw an application' })
+  @ApiOkResponseEnvelope(Application)
+  @ApiNotFoundResponse({ description: 'Application not found' })
+  withdraw(@Param('id') id: string) {
+    return this.service.withdraw(id);
+  }
+
+  @Post(':id/archive')
+  @ApiOperation({ summary: 'Archive an application' })
+  @ApiOkResponseEnvelope(Application)
+  @ApiNotFoundResponse({ description: 'Application not found' })
+  archive(@Param('id') id: string) {
+    return this.service.archive(id);
   }
 
   @Delete(':id')

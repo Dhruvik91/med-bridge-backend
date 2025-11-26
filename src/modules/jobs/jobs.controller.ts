@@ -36,11 +36,32 @@ export class JobsController {
     return this.service.findOne(id);
   }
 
-  @Get('hospital/:hospitalId')
-  @ApiOperation({ summary: 'List jobs for a hospital' })
+  @Get('employer/:employerProfileId')
+  @ApiOperation({ summary: 'List jobs for an employer' })
   @ApiOkResponseEnvelope(Job, true)
-  findByHospital(@Param('hospitalId') hospitalId: string) {
-    return this.service.findByHospital(hospitalId);
+  findByEmployer(@Param('employerProfileId') employerProfileId: string) {
+    return this.service.findByEmployer(employerProfileId);
+  }
+
+  @Get('organization/:organizationId')
+  @ApiOperation({ summary: 'List jobs for an organization' })
+  @ApiOkResponseEnvelope(Job, true)
+  findByOrganization(@Param('organizationId') organizationId: string) {
+    return this.service.findByOrganization(organizationId);
+  }
+
+  @Get('location/:locationId')
+  @ApiOperation({ summary: 'List jobs for a location' })
+  @ApiOkResponseEnvelope(Job, true)
+  findByLocation(@Param('locationId') locationId: string) {
+    return this.service.findByLocation(locationId);
+  }
+
+  @Post(':id/view')
+  @ApiOperation({ summary: 'Increment job view count' })
+  @ApiOkResponseEnvelope(EmptyResponseDto)
+  incrementViews(@Param('id') id: string) {
+    return this.service.incrementViews(id);
   }
 
   @Post()
