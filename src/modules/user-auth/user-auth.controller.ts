@@ -72,7 +72,7 @@ export class UserAuthController {
     const profile = (req as any).user as { email: string; name?: string };
     const result = await this.auth.upsertGoogleUser({ email: profile.email, name: profile.name });
     // Redirect with token as query (frontend should capture and store)
-    const redirectUrl = process.env.FRONTEND_GOOGLE_REDIRECT || 'http://localhost:3001/auth/callback';
+    const redirectUrl = process.env.GOOGLE_FRONTEND_REDIRECT_LINK || 'http://localhost:3001/auth/callback';
     const url = `${redirectUrl}?token=${encodeURIComponent(result.access_token)}`;
     return res.redirect(url);
   }
