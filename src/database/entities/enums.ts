@@ -1,19 +1,39 @@
 export enum UserRole {
-  doctor = 'doctor',
-  hospital = 'hospital',
+  candidate = 'candidate',
+  employer = 'employer',
   admin = 'admin',
 }
 
-export enum ApplicationStatus {
-  pending = 'pending',
-  reviewed = 'reviewed',
-  shortlisted = 'shortlisted',
-  rejected = 'rejected',
-  hired = 'hired',
+export enum JobType {
+  full_time = 'full_time',
+  part_time = 'part_time',
+  contract = 'contract',
+  temporary = 'temporary',
+  internship = 'internship',
+  remote = 'remote',
 }
 
 export enum JobStatus {
-  active = 'active',
-  closed = 'closed',
   draft = 'draft',
+  published = 'published',
+  closed = 'closed',
+  archived = 'archived',
+}
+
+export enum ApplicationStatus {
+  applied = 'applied',
+  viewed = 'viewed',
+  shortlisted = 'shortlisted',
+  interview = 'interview',
+  offer = 'offer',
+  hired = 'hired',
+  rejected = 'rejected',
+  withdrawn = 'withdrawn',
+}
+
+export enum Gender {
+  male = 'male',
+  female = 'female',
+  other = 'other',
+  prefer_not_say = 'prefer_not_say',
 }

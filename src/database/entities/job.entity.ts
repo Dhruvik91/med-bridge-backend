@@ -1,22 +1,35 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { HospitalProfile } from './hospital-profile.entity';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { EmployerProfile } from './employer-profile.entity';
+import { Organization } from './organization.entity';
+import { Location } from './location.entity';
+import { User } from './user.entity';
 import { Application } from './application.entity';
-import { JobStatus } from './enums';
+import { JobStatus, JobType } from './enums';
 
 @Entity({ name: 'jobs', schema: 'public' })
 export class Job {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', name: 'hospital_id' })
-  hospitalId: string;
+  @Column({ type: 'uuid', name: 'employer_profile_id' })
+  employerProfileId: string;
 
-  @ManyToOne(() => HospitalProfile, (hp) => hp.jobs, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'hospital_id' })
-  hospital: HospitalProfile;
+  @ManyToOne(() => EmployerProfile, (ep) => ep.jobs, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'employer_profile_id' })
+  employerProfile: EmployerProfile;
+
+  @Column({ type: 'uuid', name: 'organization_id', nullable: true })
+  organizationId: string | null;
+
+  @ManyToOne(() => Organization, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization | null;
 
   @Column({ type: 'text' })
   title: string;
+
+  @Column({ type: 'text', unique: true, nullable: true })
+  slug: string | null;
 
   @Column({ type: 'text' })
   description: string;
@@ -24,29 +37,64 @@ export class Job {
   @Column({ type: 'text', array: true, default: () => "'{}'" })
   requirements: string[];
 
-  @Column({ type: 'int', name: 'salary_min', nullable: true })
-  salaryMin: number | null;
+  @Column({ type: 'text', array: true, default: () => "'{}'" })
+  responsibilities: string[];
 
-  @Column({ type: 'int', name: 'salary_max', nullable: true })
-  salaryMax: number | null;
+  @Column({ type: 'text', array: true, default: () => "'{}'" })
+  perks: string[];
 
-  @Column({ type: 'text' })
-  location: string;
+  @Column({ type: 'numeric', precision: 12, scale: 2, name: 'salary_min', nullable: true })
+  salaryMin: string | null;
+
+  @Column({ type: 'numeric', precision: 12, scale: 2, name: 'salary_max', nullable: true })
+  salaryMax: string | null;
+
+  @Column({ type: 'text', default: 'INR' })
+  currency: string;
+
+  @Column({ type: 'uuid', name: 'location_id', nullable: true })
+  locationId: string | null;
+
+  @ManyToOne(() => Location, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'location_id' })
+  location: Location | null;
 
   @Column({ type: 'boolean', default: false })
   remote: boolean;
 
-  @Column({ type: 'text', nullable: true })
-  shift: string | null;
+  @Column({ type: 'enum', enum: JobType, enumName: 'job_type', default: JobType.full_time })
+  jobType: JobType;
 
-  @Column({ type: 'text', nullable: true })
-  department: string | null;
+  @Column({ type: 'uuid', name: 'posted_by_user_id', nullable: true })
+  postedByUserId: string | null;
 
-  @Column({ type: 'text', name: 'contract_type', nullable: true })
-  contractType: string | null;
+  @ManyToOne(() => User, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'posted_by_user_id' })
+  postedBy: User | null;
 
-  @Column({ type: 'enum', enum: JobStatus, enumName: 'job_status', default: JobStatus.active })
+  @Column({ type: 'enum', enum: JobStatus, enumName: 'job_status', default: JobStatus.draft })
   status: JobStatus;
+
+  @Column({ type: 'timestamptz', name: 'published_at', nullable: true })
+  publishedAt: Date | null;
+
+  @Column({ type: 'timestamptz', name: 'application_deadline', nullable: true })
+  applicationDeadline: Date | null;
+
+  @Column({ type: 'int', name: 'max_applications', nullable: true })
+  maxApplications: number | null;
+
+  @Column({ type: 'bigint', name: 'views_count', default: 0 })
+  viewsCount: number;
+
+  @Column({ type: 'bigint', name: 'favorites_count', default: 0 })
+  favoritesCount: number;
+
+  @Column({ type: 'tsvector', name: 'search_vector', nullable: true })
+  searchVector: string | null;
+
+  @Column({ type: 'jsonb', default: {} })
+  metadata: Record<string, any>;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
@@ -54,6 +102,10 @@ export class Job {
   @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
   updatedAt: Date;
 
+  @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at', nullable: true })
+  deletedAt: Date | null;
+
   @OneToMany(() => Application, (a) => a.job)
   applications: Application[];
 }
+

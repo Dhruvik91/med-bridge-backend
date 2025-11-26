@@ -17,12 +17,12 @@ export class UserAuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async signup(email: string, password: string, role: UserRole, name?: string) {
+  async signup(email: string, password: string, role: UserRole) {
     const exists = await this.usersRepo.findOne({ where: { email } });
     if (exists) throw new ConflictException('Email already registered');
 
     const passwordHash = await this.hashing.hash(password);
-    const user = this.usersRepo.create({ email, role, name: name ?? null, passwordHash });
+    const user = this.usersRepo.create({ email, role, passwordHash });
     const saved = await this.usersRepo.save(user);
     const token = this.generateToken({ id: saved.id, email: saved.email, role: saved.role });
     return { access_token: token, user: saved };
@@ -50,7 +50,7 @@ export class UserAuthService {
     if (!email) throw new UnauthorizedException('Google profile missing email');
     let user = await this.usersRepo.findOne({ where: { email } });
     if (!user) {
-      user = this.usersRepo.create({ email, role: UserRole.doctor, name: profile.name ?? null, passwordHash: null });
+      user = this.usersRepo.create({ email, role: UserRole.candidate, passwordHash: null });
       user = await this.usersRepo.save(user);
     }
     return this.login(user);

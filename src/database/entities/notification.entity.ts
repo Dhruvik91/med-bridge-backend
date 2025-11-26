@@ -16,12 +16,13 @@ export class Notification {
   @Column({ type: 'text' })
   type: string;
 
-  @Column({ type: 'jsonb', default: () => "'{}'" })
-  payload: Record<string, any>;
+  @Column({ type: 'jsonb', nullable: true })
+  data: Record<string, any> | null;
 
-  @Column({ type: 'boolean', default: false })
-  read: boolean;
+  @Column({ type: 'boolean', name: 'is_read', default: false })
+  isRead: boolean;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
 }
+

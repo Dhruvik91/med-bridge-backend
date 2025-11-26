@@ -2,25 +2,38 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
+  IsDateString,
   IsEnum,
   IsInt,
+  IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
   Min,
 } from 'class-validator';
-import { JobStatus } from '../../../database/entities/enums';
+import { JobStatus, JobType } from '../../../database/entities/enums';
 
 export class CreateJobDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
-  hospitalId: string;
+  employerProfileId: string;
+
+  @ApiProperty({ required: false, format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  organizationId?: string;
 
   @ApiProperty()
   @IsString()
   @MaxLength(255)
   title: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  slug?: string;
 
   @ApiProperty()
   @IsString()
@@ -32,44 +45,76 @@ export class CreateJobDto {
   @IsString({ each: true })
   requirements?: string[];
 
-  @ApiProperty({ required: false, minimum: 0 })
+  @ApiProperty({ type: [String], required: false })
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  salaryMin?: number;
+  @IsArray()
+  @IsString({ each: true })
+  responsibilities?: string[];
 
-  @ApiProperty({ required: false, minimum: 0 })
+  @ApiProperty({ type: [String], required: false })
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  salaryMax?: number;
+  @IsArray()
+  @IsString({ each: true })
+  perks?: string[];
 
-  @ApiProperty()
+  @ApiProperty({ required: false, description: 'Minimum salary as decimal string' })
+  @IsOptional()
   @IsString()
-  location: string;
+  salaryMin?: string;
+
+  @ApiProperty({ required: false, description: 'Maximum salary as decimal string' })
+  @IsOptional()
+  @IsString()
+  salaryMax?: string;
+
+  @ApiProperty({ required: false, default: 'INR' })
+  @IsOptional()
+  @IsString()
+  currency?: string;
+
+  @ApiProperty({ required: false, format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  locationId?: string;
 
   @ApiProperty({ default: false })
   @IsOptional()
   @IsBoolean()
   remote?: boolean;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, enum: JobType, default: JobType.full_time })
   @IsOptional()
-  @IsString()
-  shift?: string;
+  @IsEnum(JobType)
+  jobType?: JobType;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, format: 'uuid' })
   @IsOptional()
-  @IsString()
-  department?: string;
+  @IsUUID()
+  postedByUserId?: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  contractType?: string;
-
-  @ApiProperty({ required: false, enum: JobStatus, default: JobStatus.active })
+  @ApiProperty({ required: false, enum: JobStatus, default: JobStatus.draft })
   @IsOptional()
   @IsEnum(JobStatus)
   status?: JobStatus;
+
+  @ApiProperty({ required: false, format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  publishedAt?: string;
+
+  @ApiProperty({ required: false, format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  applicationDeadline?: string;
+
+  @ApiProperty({ required: false, minimum: 1 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  maxApplications?: number;
+
+  @ApiProperty({ required: false, type: 'object' })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
 }

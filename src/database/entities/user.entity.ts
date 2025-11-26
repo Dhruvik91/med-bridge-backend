@@ -1,10 +1,9 @@
-import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { UserRole } from './enums';
 import { DoctorProfile } from './doctor-profile.entity';
-import { HospitalProfile } from './hospital-profile.entity';
+import { EmployerProfile } from './employer-profile.entity';
 import { Message } from './message.entity';
 import { Notification } from './notification.entity';
-import { UUID } from 'crypto';
 
 @Entity({ name: 'users', schema: 'public' })
 export class User {
@@ -17,26 +16,32 @@ export class User {
   @Column({ type: 'text', name: 'password_hash', nullable: true })
   passwordHash: string | null;
 
-  @Column({ type: 'enum', enum: UserRole, enumName: 'user_role' })
+  @Column({ type: 'enum', enum: UserRole, enumName: 'user_role', default: UserRole.candidate })
   role: UserRole;
 
-  @Column({ type: 'text', nullable: true })
-  name: string | null;
-
-  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
-  createdAt: Date;
-
-  @Column({ type: 'uuid', name: 'profile_id', nullable: true })
-  profileId: string | null;
+  @Column({ type: 'boolean', name: 'is_active', default: true })
+  isActive: boolean;
 
   @Column({ type: 'boolean', name: 'is_verified', default: false })
   isVerified: boolean;
 
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at', nullable: true })
+  deletedAt: Date | null;
+
+  @Column({ type: 'jsonb', default: {} })
+  metadata: Record<string, any>;
+
   @OneToOne(() => DoctorProfile, (dp) => dp.user)
   doctorProfile?: DoctorProfile;
 
-  @OneToOne(() => HospitalProfile, (hp) => hp.user)
-  hospitalProfile?: HospitalProfile;
+  @OneToOne(() => EmployerProfile, (ep) => ep.user)
+  employerProfile?: EmployerProfile;
 
   @OneToMany(() => Message, (m) => m.sender)
   sentMessages: Message[];
