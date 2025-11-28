@@ -25,7 +25,10 @@ export class UserAuthService {
     const user = this.usersRepo.create({ email, role, passwordHash });
     const saved = await this.usersRepo.save(user);
     const token = this.generateToken({ id: saved.id, email: saved.email, role: saved.role });
-    return { access_token: token, user: saved };
+    
+    // Exclude passwordHash from response
+    const { passwordHash: _, ...userWithoutPassword } = saved;
+    return { access_token: token, user: userWithoutPassword };
   }
 
   async validateUser(email: string, password: string) {
@@ -42,7 +45,10 @@ export class UserAuthService {
 
   async login(user: User) {
     const token = this.generateToken({ id: user.id, email: user.email, role: user.role });
-    return { access_token: token, user };
+    
+    // Exclude passwordHash from response
+    const { passwordHash: _, ...userWithoutPassword } = user;
+    return { access_token: token, user: userWithoutPassword };
   }
 
   async upsertGoogleUser(profile: { email: string; name?: string }) {
@@ -57,6 +63,11 @@ export class UserAuthService {
   }
 
   async me(userId: string) {
-    return this.usersRepo.findOne({ where: { id: userId } });
+    const user = await this.usersRepo.findOne({ where: { id: userId } });
+    if (!user) return null;
+    
+    // Exclude passwordHash from response
+    const { passwordHash: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }
