@@ -28,14 +28,6 @@ export class JobsController {
     return this.service.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get job by ID' })
-  @ApiOkResponseEnvelope(Job)
-  @ApiNotFoundResponse({ description: 'Job not found' })
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
-  }
-
   @Get('employer/:employerProfileId')
   @ApiOperation({ summary: 'List jobs for an employer' })
   @ApiOkResponseEnvelope(Job, true)
@@ -57,11 +49,12 @@ export class JobsController {
     return this.service.findByLocation(locationId);
   }
 
-  @Post(':id/view')
-  @ApiOperation({ summary: 'Increment job view count' })
-  @ApiOkResponseEnvelope(EmptyResponseDto)
-  incrementViews(@Param('id') id: string) {
-    return this.service.incrementViews(id);
+  @Get(':id')
+  @ApiOperation({ summary: 'Get job by ID' })
+  @ApiOkResponseEnvelope(Job)
+  @ApiNotFoundResponse({ description: 'Job not found' })
+  findOne(@Param('id') id: string) {
+    return this.service.findOne(id);
   }
 
   @Post()
@@ -69,6 +62,13 @@ export class JobsController {
   @ApiCreatedResponseEnvelope(Job)
   create(@Body() dto: CreateJobDto) {
     return this.service.create(dto);
+  }
+
+  @Post(':id/view')
+  @ApiOperation({ summary: 'Increment job view count' })
+  @ApiOkResponseEnvelope(EmptyResponseDto)
+  incrementViews(@Param('id') id: string) {
+    return this.service.incrementViews(id);
   }
 
   @Patch(':id')

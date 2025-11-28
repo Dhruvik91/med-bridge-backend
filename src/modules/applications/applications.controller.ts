@@ -28,14 +28,6 @@ export class ApplicationsController {
     return this.service.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get application by ID' })
-  @ApiOkResponseEnvelope(Application)
-  @ApiNotFoundResponse({ description: 'Application not found' })
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
-  }
-
   @Get('candidate/:candidateId')
   @ApiOperation({ summary: 'List applications for a candidate' })
   @ApiOkResponseEnvelope(Application, true)
@@ -48,6 +40,14 @@ export class ApplicationsController {
   @ApiOkResponseEnvelope(Application, true)
   findByJob(@Param('jobId') jobId: string) {
     return this.service.findByJob(jobId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get application by ID' })
+  @ApiOkResponseEnvelope(Application)
+  @ApiNotFoundResponse({ description: 'Application not found' })
+  findOne(@Param('id') id: string) {
+    return this.service.findOne(id);
   }
 
   @Post()

@@ -28,19 +28,19 @@ export class EmployerProfileController {
     return this.service.findAll();
   }
 
+  @Get('user/:userId')
+  @ApiOperation({ summary: 'Get employer profile by user ID' })
+  @ApiOkResponseEnvelope(EmployerProfile)
+  findByUser(@Param('userId') userId: string) {
+    return this.service.findByUser(userId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get employer profile by ID' })
   @ApiOkResponseEnvelope(EmployerProfile)
   @ApiNotFoundResponse({ description: 'Employer profile not found' })
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
-  }
-
-  @Get('user/:userId')
-  @ApiOperation({ summary: 'Get employer profile by user ID' })
-  @ApiOkResponseEnvelope(EmployerProfile)
-  findByUser(@Param('userId') userId: string) {
-    return this.service.findByUser(userId);
   }
 
   @Post()

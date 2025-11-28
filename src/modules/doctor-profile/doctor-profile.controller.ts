@@ -28,19 +28,19 @@ export class DoctorProfileController {
     return this.service.findAll();
   }
 
+  @Get('user/:userId')
+  @ApiOperation({ summary: 'Get doctor profile by user ID' })
+  @ApiOkResponseEnvelope(DoctorProfile)
+  findByUser(@Param('userId') userId: string) {
+    return this.service.findByUser(userId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get doctor profile by ID' })
   @ApiOkResponseEnvelope(DoctorProfile)
   @ApiNotFoundResponse({ description: 'Doctor profile not found' })
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
-  }
-
-  @Get('user/:userId')
-  @ApiOperation({ summary: 'Get doctor profile by user ID' })
-  @ApiOkResponseEnvelope(DoctorProfile)
-  findByUser(@Param('userId') userId: string) {
-    return this.service.findByUser(userId);
   }
 
   @Post()
