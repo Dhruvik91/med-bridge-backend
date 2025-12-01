@@ -18,6 +18,8 @@ import { ApplicationsModule } from './modules/applications/applications.module';
 import { SavedJobsModule } from './modules/saved-jobs/saved-jobs.module';
 import { JobNotesModule } from './modules/job-notes/job-notes.module';
 import { AttachmentsModule } from './modules/attachments/attachments.module';
+import { AwsModule } from './modules/aws/aws.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
 import { UserAuthModule } from './modules/user-auth/user-auth.module';
 // import { MessagesModule } from './modules/messages/messages.module';
 
@@ -26,16 +28,16 @@ import { UserAuthModule } from './modules/user-auth/user-auth.module';
     TypeOrmConnectionModule,
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
-    
+
     // Core modules
     UsersModule,
     UserAuthModule,
-    
+
     // Profile modules
     DoctorProfileModule,
     EmployerProfileModule,
     OrganizationsModule,
-    
+
     // Job board modules
     SpecialtiesModule,
     LocationsModule,
@@ -43,14 +45,16 @@ import { UserAuthModule } from './modules/user-auth/user-auth.module';
     ApplicationsModule,
     SavedJobsModule,
     JobNotesModule,
-    
+
     // Utility modules
     AttachmentsModule,
-    
+    AwsModule,
+    UploadsModule,
+
     // Future: Messaging
     // MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
