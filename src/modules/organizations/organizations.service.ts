@@ -12,8 +12,15 @@ export class OrganizationsService {
     private readonly repo: Repository<Organization>,
   ) {}
 
-  findAll() {
-    return this.repo.find({ relations: ['employerProfile'] });
+  async findAll(page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
+      relations: ['employerProfile'],
+      take,
+      skip,
+    });
+    return { items, total, page, limit };
   }
 
   findOne(id: string) {
@@ -23,8 +30,15 @@ export class OrganizationsService {
     });
   }
 
-  findByEmployer(employerProfileId: string) {
-    return this.repo.find({ where: { employerProfileId } });
+  async findByEmployer(employerProfileId: string, page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
+      where: { employerProfileId },
+      take,
+      skip,
+    });
+    return { items, total, page, limit };
   }
 
   async create(dto: CreateOrganizationDto) {

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Patch, Delete, Query } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { Organization } from '../../database/entities/organization.entity';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiNotFoundResponse } from '@nestjs/swagger';
@@ -9,6 +9,7 @@ import {
   ApiOkResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
+import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
 
 @ApiTags('Organizations')
 @ApiBearerAuth()
@@ -19,8 +20,9 @@ export class OrganizationsController {
   @Get()
   @ApiOperation({ summary: 'List all organizations' })
   @ApiOkResponseEnvelope(Organization, true)
-  findAll(): Promise<Organization[]> {
-    return this.service.findAll();
+  findAll(@Query() pagination: PaginationQueryDto) {
+    const { page, limit } = pagination;
+    return this.service.findAll(page, limit);
   }
 
   @Get(':id')
@@ -34,7 +36,9 @@ export class OrganizationsController {
   @Get('employer/:employerProfileId')
   @ApiOperation({ summary: 'List organizations for an employer' })
   @ApiOkResponseEnvelope(Organization, true)
-  findByEmployer(@Param('employerProfileId') employerProfileId: string) {
+  findByEmployer(
+    @Param('employerProfileId') employerProfileId: string,
+  ) {
     return this.service.findByEmployer(employerProfileId);
   }
 

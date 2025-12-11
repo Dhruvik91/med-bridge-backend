@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Delete, Query } from '@nestjs/common';
 import { SavedJobsService } from './saved-jobs.service';
 import { SavedJob } from '../../database/entities/saved-job.entity';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiNotFoundResponse } from '@nestjs/swagger';
@@ -8,6 +8,7 @@ import {
   ApiOkResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
+import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
 
 @ApiTags('Saved Jobs')
 @ApiBearerAuth()
@@ -18,8 +19,12 @@ export class SavedJobsController {
   @Get('user/:userId')
   @ApiOperation({ summary: 'Get all saved jobs for a user' })
   @ApiOkResponseEnvelope(SavedJob, true)
-  findByUser(@Param('userId') userId: string) {
-    return this.service.findByUser(userId);
+  findByUser(
+    @Param('userId') userId: string,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    const { page, limit } = pagination;
+    return this.service.findByUser(userId, page, limit);
   }
 
   @Post()

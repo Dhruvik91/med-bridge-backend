@@ -12,10 +12,15 @@ export class JobsService {
     private readonly repo: Repository<Job>,
   ) {}
 
-  findAll() {
-    return this.repo.find({ 
-      relations: ['employerProfile', 'organization', 'location', 'postedBy', 'applications'] 
+  async findAll(page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
+      relations: ['employerProfile', 'organization', 'location', 'postedBy', 'applications'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
   findOne(id: string) {
@@ -25,25 +30,40 @@ export class JobsService {
     });
   }
 
-  findByEmployer(employerProfileId: string) {
-    return this.repo.find({ 
+  async findByEmployer(employerProfileId: string, page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
       where: { employerProfileId },
-      relations: ['organization', 'location'] 
+      relations: ['organization', 'location'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
-  findByOrganization(organizationId: string) {
-    return this.repo.find({ 
+  async findByOrganization(organizationId: string, page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
       where: { organizationId },
-      relations: ['employerProfile', 'location'] 
+      relations: ['employerProfile', 'location'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
-  findByLocation(locationId: string) {
-    return this.repo.find({ 
+  async findByLocation(locationId: string, page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
       where: { locationId },
-      relations: ['employerProfile', 'organization'] 
+      relations: ['employerProfile', 'organization'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
   async create(dto: CreateJobDto) {

@@ -22,10 +22,15 @@ export class ApplicationsService {
     private readonly doctorProfileRepo: Repository<DoctorProfile>,
   ) { }
 
-  findAll() {
-    return this.repo.find({
-      relations: ['job', 'candidate', 'candidateProfile']
+  async findAll(page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
+      relations: ['job', 'candidate', 'candidateProfile'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
   findOne(id: string) {
@@ -35,18 +40,28 @@ export class ApplicationsService {
     });
   }
 
-  findByCandidate(candidateId: string) {
-    return this.repo.find({
+  async findByCandidate(candidateId: string, page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
       where: { candidateId },
-      relations: ['job', 'candidateProfile']
+      relations: ['job', 'candidateProfile'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
-  findByJob(jobId: string) {
-    return this.repo.find({
+  async findByJob(jobId: string, page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
       where: { jobId },
-      relations: ['candidate', 'candidateProfile']
+      relations: ['candidate', 'candidateProfile'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
   async create(dto: CreateApplicationDto) {

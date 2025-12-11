@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Patch, Delete, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '../../database/entities/user.entity';
 import {
@@ -14,6 +14,7 @@ import {
   ApiOkResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
+import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -24,8 +25,9 @@ export class UsersController {
   @Get()
   @ApiOperation({ summary: 'List all users' })
   @ApiOkResponseEnvelope(User, true)
-  findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  findAll(@Query() pagination: PaginationQueryDto) {
+    const { page, limit } = pagination;
+    return this.usersService.findAll(page, limit);
   }
 
   @Get(':id')
