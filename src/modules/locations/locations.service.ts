@@ -12,16 +12,22 @@ export class LocationsService {
     private readonly repo: Repository<Location>,
   ) {}
 
-  findAll() {
-    return this.repo.find();
+  async findAll(page = 1, limit = 50) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({ take, skip });
+    return { items, total, page, limit };
   }
 
   findOne(id: string) {
     return this.repo.findOne({ where: { id } });
   }
 
-  findByCity(city: string) {
-    return this.repo.find({ where: { city } });
+  async findByCity(city: string, page = 1, limit = 50) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({ where: { city }, take, skip });
+    return { items, total, page, limit };
   }
 
   async create(dto: CreateLocationDto) {

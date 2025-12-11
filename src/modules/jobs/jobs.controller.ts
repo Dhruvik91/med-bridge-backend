@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Patch, Delete, Query } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { Job } from '../../database/entities/job.entity';
 import {
@@ -14,6 +14,7 @@ import {
   ApiOkResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
+import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
 
 @ApiTags('Jobs')
 @ApiBearerAuth()
@@ -24,28 +25,35 @@ export class JobsController {
   @Get()
   @ApiOperation({ summary: 'List all jobs' })
   @ApiOkResponseEnvelope(Job, true)
-  findAll(): Promise<Job[]> {
-    return this.service.findAll();
+  findAll(@Query() pagination: PaginationQueryDto) {
+    const { page, limit } = pagination;
+    return this.service.findAll(page, limit);
   }
 
   @Get('employer/:employerProfileId')
   @ApiOperation({ summary: 'List jobs for an employer' })
   @ApiOkResponseEnvelope(Job, true)
-  findByEmployer(@Param('employerProfileId') employerProfileId: string) {
+  findByEmployer(
+    @Param('employerProfileId') employerProfileId: string,
+  ) {
     return this.service.findByEmployer(employerProfileId);
   }
 
   @Get('organization/:organizationId')
   @ApiOperation({ summary: 'List jobs for an organization' })
   @ApiOkResponseEnvelope(Job, true)
-  findByOrganization(@Param('organizationId') organizationId: string) {
+  findByOrganization(
+    @Param('organizationId') organizationId: string,
+  ) {
     return this.service.findByOrganization(organizationId);
   }
 
   @Get('location/:locationId')
   @ApiOperation({ summary: 'List jobs for a location' })
   @ApiOkResponseEnvelope(Job, true)
-  findByLocation(@Param('locationId') locationId: string) {
+  findByLocation(
+    @Param('locationId') locationId: string,
+  ) {
     return this.service.findByLocation(locationId);
   }
 

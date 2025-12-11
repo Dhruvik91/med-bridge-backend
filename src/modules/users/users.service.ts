@@ -10,8 +10,11 @@ export class UsersService {
     private readonly usersRepo: Repository<User>,
   ) {}
 
-  findAll() {
-    return this.usersRepo.find();
+  async findAll(page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.usersRepo.findAndCount({ take, skip });
+    return { items, total, page, limit };
   }
 
   findOne(id: string) {

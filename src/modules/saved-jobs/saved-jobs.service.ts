@@ -11,11 +11,16 @@ export class SavedJobsService {
     private readonly repo: Repository<SavedJob>,
   ) {}
 
-  findByUser(userId: string) {
-    return this.repo.find({ 
+  async findByUser(userId: string, page = 1, limit = 50) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({ 
       where: { userId },
-      relations: ['job', 'user'] 
+      relations: ['job', 'user'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
   async findOne(userId: string, jobId: string) {

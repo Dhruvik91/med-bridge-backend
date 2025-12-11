@@ -12,8 +12,11 @@ export class SpecialtiesService {
     private readonly repo: Repository<Specialty>,
   ) {}
 
-  findAll() {
-    return this.repo.find();
+  async findAll(page = 1, limit = 100) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({ take, skip });
+    return { items, total, page, limit };
   }
 
   findOne(id: string) {

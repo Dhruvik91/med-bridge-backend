@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Patch, Delete, Query } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { Application } from '../../database/entities/application.entity';
 import {
@@ -14,6 +14,7 @@ import {
   ApiOkResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
+import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
 
 @ApiTags('Applications')
 @ApiBearerAuth()
@@ -24,22 +25,31 @@ export class ApplicationsController {
   @Get()
   @ApiOperation({ summary: 'List all applications' })
   @ApiOkResponseEnvelope(Application, true)
-  findAll(): Promise<Application[]> {
-    return this.service.findAll();
+  findAll(@Query() pagination: PaginationQueryDto) {
+    const { page, limit } = pagination;
+    return this.service.findAll(page, limit);
   }
 
   @Get('candidate/:candidateId')
   @ApiOperation({ summary: 'List applications for a candidate' })
   @ApiOkResponseEnvelope(Application, true)
-  findByCandidate(@Param('candidateId') candidateId: string) {
-    return this.service.findByCandidate(candidateId);
+  findByCandidate(
+    @Param('candidateId') candidateId: string,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    const { page, limit } = pagination;
+    return this.service.findByCandidate(candidateId, page, limit);
   }
 
   @Get('job/:jobId')
   @ApiOperation({ summary: 'List applications for a job' })
   @ApiOkResponseEnvelope(Application, true)
-  findByJob(@Param('jobId') jobId: string) {
-    return this.service.findByJob(jobId);
+  findByJob(
+    @Param('jobId') jobId: string,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    const { page, limit } = pagination;
+    return this.service.findByJob(jobId, page, limit);
   }
 
   @Get(':id')

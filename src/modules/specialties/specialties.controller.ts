@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Patch, Delete, Query } from '@nestjs/common';
 import { SpecialtiesService } from './specialties.service';
 import { Specialty } from '../../database/entities/specialty.entity';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiNotFoundResponse } from '@nestjs/swagger';
@@ -9,6 +9,7 @@ import {
   ApiOkResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
+import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
 
 @ApiTags('Specialties')
 @ApiBearerAuth()
@@ -19,8 +20,9 @@ export class SpecialtiesController {
   @Get()
   @ApiOperation({ summary: 'List all specialties' })
   @ApiOkResponseEnvelope(Specialty, true)
-  findAll(): Promise<Specialty[]> {
-    return this.service.findAll();
+  findAll(@Query() pagination: PaginationQueryDto) {
+    const { page, limit } = pagination;
+    return this.service.findAll(page, limit);
   }
 
   @Get(':id')

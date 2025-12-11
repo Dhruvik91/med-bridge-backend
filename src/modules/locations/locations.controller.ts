@@ -9,6 +9,7 @@ import {
   ApiOkResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
+import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
 
 @ApiTags('Locations')
 @ApiBearerAuth()
@@ -20,9 +21,13 @@ export class LocationsController {
   @ApiOperation({ summary: 'List all locations' })
   @ApiQuery({ name: 'city', required: false })
   @ApiOkResponseEnvelope(Location, true)
-  findAll(@Query('city') city?: string): Promise<Location[]> {
-    if (city) return this.service.findByCity(city);
-    return this.service.findAll();
+  findAll(
+    @Query('city') city: string | undefined,
+    @Query() pagination: PaginationQueryDto,
+  ) {
+    const { page, limit } = pagination;
+    if (city) return this.service.findByCity(city, page, limit);
+    return this.service.findAll(page, limit);
   }
 
   @Get(':id')

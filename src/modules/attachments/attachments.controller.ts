@@ -8,6 +8,7 @@ import {
   ApiOkResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
+import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
 
 @ApiTags('Attachments')
 @ApiBearerAuth()
@@ -22,12 +23,14 @@ export class AttachmentsController {
   @ApiOkResponseEnvelope(Attachment, true)
   findAll(
     @Query('ownerType') ownerType?: string,
-    @Query('ownerId') ownerId?: string
-  ): Promise<Attachment[]> {
+    @Query('ownerId') ownerId?: string,
+    @Query() pagination: PaginationQueryDto = new PaginationQueryDto(),
+  ) {
+    const { page, limit } = pagination;
     if (ownerType && ownerId) {
-      return this.service.findByOwner(ownerType, ownerId);
+      return this.service.findByOwner(ownerType, ownerId, page, limit);
     }
-    return this.service.findAll();
+    return this.service.findAll(page, limit);
   }
 
   @Get(':id')

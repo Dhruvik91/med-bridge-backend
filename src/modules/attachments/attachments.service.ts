@@ -11,8 +11,15 @@ export class AttachmentsService {
     private readonly repo: Repository<Attachment>,
   ) {}
 
-  findAll() {
-    return this.repo.find({ relations: ['uploader'] });
+  async findAll(page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
+      relations: ['uploader'],
+      take,
+      skip,
+    });
+    return { items, total, page, limit };
   }
 
   findOne(id: string) {
@@ -22,11 +29,16 @@ export class AttachmentsService {
     });
   }
 
-  findByOwner(ownerType: string, ownerId: string) {
-    return this.repo.find({ 
+  async findByOwner(ownerType: string, ownerId: string, page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({ 
       where: { ownerType, ownerId },
-      relations: ['uploader'] 
+      relations: ['uploader'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
   async create(dto: CreateAttachmentDto) {

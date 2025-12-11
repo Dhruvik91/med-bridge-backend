@@ -12,8 +12,15 @@ export class JobNotesService {
     private readonly repo: Repository<JobNote>,
   ) {}
 
-  findAll() {
-    return this.repo.find({ relations: ['job', 'application', 'creator'] });
+  async findAll(page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
+      relations: ['job', 'application', 'creator'],
+      take,
+      skip,
+    });
+    return { items, total, page, limit };
   }
 
   findOne(id: string) {
@@ -23,18 +30,28 @@ export class JobNotesService {
     });
   }
 
-  findByJob(jobId: string) {
-    return this.repo.find({ 
+  async findByJob(jobId: string, page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
       where: { jobId },
-      relations: ['creator'] 
+      relations: ['creator'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
-  findByApplication(applicationId: string) {
-    return this.repo.find({ 
+  async findByApplication(applicationId: string, page = 1, limit = 20) {
+    const take = limit;
+    const skip = (page - 1) * limit;
+    const [items, total] = await this.repo.findAndCount({
       where: { applicationId },
-      relations: ['creator'] 
+      relations: ['creator'],
+      take,
+      skip,
     });
+    return { items, total, page, limit };
   }
 
   async create(dto: CreateJobNoteDto) {
