@@ -1,4 +1,5 @@
 import { NestFactory, Reflector } from '@nestjs/core';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { FailureResponseTransformer } from './core/exception-filters/failure-exception';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
@@ -31,6 +32,7 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization',
   });
 
+  app.use(cookieParser());
   app.useGlobalFilters(new FailureResponseTransformer());
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(reflector),

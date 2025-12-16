@@ -26,8 +26,16 @@ export class UserAuthController {
   @Post('signup')
   @ApiOperation({ summary: 'Sign up a new user (candidate/employer)' })
   @ApiCreatedResponse({ description: 'User registered and JWT returned' })
-  async signup(@Body() body: SignupDto) {
-    return this.auth.signup(body.email, body.password, body.role);
+  async signup(@Body() body: SignupDto, @Res({ passthrough: true }) res: Response) {
+    const result = await this.auth.signup(body.email, body.password, body.role);
+    res.cookie('access_token', result.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    });
+    return result;
   }
 
   @AllowUnauthorized()
@@ -35,11 +43,19 @@ export class UserAuthController {
   @Post('login')
   @ApiOperation({ summary: 'Login user and return JWT' })
   @ApiOkResponse({ description: 'Successfully authenticated, returns JWT token' })
-  async login(@Req() req: Request) {
+  async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     // req.user is set by Local Strategy
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const user = (req as any).user;
-    return this.auth.login(user);
+    const result = await this.auth.login(user);
+    res.cookie('access_token', result.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    });
+    return result;
   }
 
   @UseGuards(AuthGuard('jwt-user'))
@@ -50,6 +66,20 @@ export class UserAuthController {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload = (req as any).user as { id: string };
     return this.auth.me(payload.id);
+  }
+
+  @UseGuards(AuthGuard('jwt-user'))
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout current user and clear auth cookie' })
+  @ApiOkResponse({ description: 'Successfully logged out' })
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+    return { success: true };
   }
 
   // Initiate Google OAuth
@@ -70,6 +100,13 @@ export class UserAuthController {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const profile = (req as any).user as { email: string; name?: string };
     const result = await this.auth.upsertGoogleUser({ email: profile.email, name: profile.name });
+    res.cookie('access_token', result.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    });
     // Redirect with token as query (frontend should capture and store)
     const redirectUrl = process.env.GOOGLE_FRONTEND_REDIRECT_LINK || 'http://localhost:3001/auth/callback';
     const url = `${redirectUrl}?token=${encodeURIComponent(result.access_token)}`;
