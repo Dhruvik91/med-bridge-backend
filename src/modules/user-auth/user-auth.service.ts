@@ -1,4 +1,5 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -6,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../../database/entities/user.entity';
 import { UserRole } from '../../database/entities/enums';
 import { HashingService } from '../../core/hashing/hashing';
+import { MailerService } from '../mailer/mailer.service';
 
 export type JwtPayload = { id: string; email: string; role: UserRole };
 
@@ -15,6 +17,7 @@ export class UserAuthService {
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
     private readonly hashing: HashingService,
     private readonly jwt: JwtService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async signup(email: string, password: string, role: UserRole) {
@@ -69,5 +72,65 @@ export class UserAuthService {
     // Exclude passwordHash from response
     const { passwordHash: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
+  }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const user = await this.usersRepo.findOne({ where: { email } });
+    
+    // Always return success message to prevent email enumeration
+    if (!user) {
+      return { message: 'If an account with that email exists, a password reset link has been sent.' };
+    }
+
+    // Generate a secure random token
+    const resetToken = randomBytes(32).toString('hex');
+    const resetTokenHash = await this.hashing.hash(resetToken);
+    
+    // Set token expiry to 1 hour from now
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+
+    // Save hashed token and expiry to user
+    user.passwordResetToken = resetTokenHash;
+    user.passwordResetExpires = expiresAt;
+    await this.usersRepo.save(user);
+
+    // Send email with the plain token (not hashed)
+    await this.mailerService.sendPasswordResetEmail(email, resetToken);
+
+    return { message: 'If an account with that email exists, a password reset link has been sent.' };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    // Find users with non-expired reset tokens
+    const users = await this.usersRepo
+      .createQueryBuilder('user')
+      .where('user.passwordResetToken IS NOT NULL')
+      .andWhere('user.passwordResetExpires > :now', { now: new Date() })
+      .getMany();
+
+    // Find the user whose token matches
+    let matchedUser: User | null = null;
+    for (const user of users) {
+      if (user.passwordResetToken) {
+        const isMatch = await this.hashing.compare(token, user.passwordResetToken);
+        if (isMatch) {
+          matchedUser = user;
+          break;
+        }
+      }
+    }
+
+    if (!matchedUser) {
+      throw new BadRequestException('Invalid or expired password reset token');
+    }
+
+    // Hash the new password and clear reset token
+    matchedUser.passwordHash = await this.hashing.hash(newPassword);
+    matchedUser.passwordResetToken = null;
+    matchedUser.passwordResetExpires = null;
+    await this.usersRepo.save(matchedUser);
+
+    return { message: 'Password has been reset successfully. You can now log in with your new password.' };
   }
 }

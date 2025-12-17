@@ -12,11 +12,13 @@ import { UserAuthController } from './user-auth.controller';
 import { LocalUserStrategy } from './strategies/local-user.strategy';
 import { JwtUserStrategy } from './strategies/jwt-user.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { MailerConfigModule } from '../mailer/mailer.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
+    MailerConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
