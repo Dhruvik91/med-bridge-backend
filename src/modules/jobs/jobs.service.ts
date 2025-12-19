@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Job } from '../../database/entities/job.entity';
+import { Specialty } from '../../database/entities/specialty.entity';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 
@@ -10,13 +11,15 @@ export class JobsService {
   constructor(
     @InjectRepository(Job)
     private readonly repo: Repository<Job>,
-  ) {}
+    @InjectRepository(Specialty)
+    private readonly specialtyRepo: Repository<Specialty>,
+  ) { }
 
   async findAll(page = 1, limit = 20) {
     const take = limit;
     const skip = (page - 1) * limit;
     const [items, total] = await this.repo.findAndCount({
-      relations: ['employerProfile', 'organization', 'location', 'postedBy', 'applications'],
+      relations: ['employerProfile', 'organization', 'location', 'postedBy', 'applications', 'specialties'],
       take,
       skip,
     });
@@ -24,9 +27,9 @@ export class JobsService {
   }
 
   findOne(id: string) {
-    return this.repo.findOne({ 
-      where: { id }, 
-      relations: ['employerProfile', 'organization', 'location', 'postedBy', 'applications'] 
+    return this.repo.findOne({
+      where: { id },
+      relations: ['employerProfile', 'organization', 'location', 'postedBy', 'applications', 'specialties']
     });
   }
 
@@ -35,7 +38,7 @@ export class JobsService {
     const skip = (page - 1) * limit;
     const [items, total] = await this.repo.findAndCount({
       where: { employerProfileId },
-      relations: ['organization', 'location'],
+      relations: ['organization', 'location', 'specialties'],
       take,
       skip,
     });
@@ -47,7 +50,7 @@ export class JobsService {
     const skip = (page - 1) * limit;
     const [items, total] = await this.repo.findAndCount({
       where: { organizationId },
-      relations: ['employerProfile', 'location'],
+      relations: ['employerProfile', 'location', 'specialties'],
       take,
       skip,
     });
@@ -59,7 +62,7 @@ export class JobsService {
     const skip = (page - 1) * limit;
     const [items, total] = await this.repo.findAndCount({
       where: { locationId },
-      relations: ['employerProfile', 'organization'],
+      relations: ['employerProfile', 'organization', 'specialties'],
       take,
       skip,
     });
@@ -67,14 +70,34 @@ export class JobsService {
   }
 
   async create(dto: CreateJobDto) {
-    const entity = this.repo.create(dto);
+    const { specialtyIds, ...jobData } = dto;
+    const entity = this.repo.create(jobData);
+
+    if (specialtyIds && specialtyIds.length > 0) {
+      entity.specialties = await this.specialtyRepo.findByIds(specialtyIds);
+    }
+
     return await this.repo.save(entity);
   }
 
   async update(id: string, dto: UpdateJobDto) {
-    const existing = await this.repo.findOne({ where: { id } });
+    const existing = await this.repo.findOne({
+      where: { id },
+      relations: ['specialties']
+    });
     if (!existing) throw new NotFoundException('Job not found');
-    Object.assign(existing, dto);
+
+    const { specialtyIds, ...jobData } = dto;
+    Object.assign(existing, jobData);
+
+    if (specialtyIds !== undefined) {
+      if (specialtyIds.length > 0) {
+        existing.specialties = await this.specialtyRepo.findByIds(specialtyIds);
+      } else {
+        existing.specialties = [];
+      }
+    }
+
     return await this.repo.save(existing);
   }
 

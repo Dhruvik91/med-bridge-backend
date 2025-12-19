@@ -1,9 +1,10 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { EmployerProfile } from './employer-profile.entity';
 import { Organization } from './organization.entity';
 import { Location } from './location.entity';
 import { User } from './user.entity';
 import { Application } from './application.entity';
+import { Specialty } from './specialty.entity';
 import { JobStatus, JobType } from './enums';
 
 @Entity({ name: 'jobs', schema: 'public' })
@@ -107,5 +108,13 @@ export class Job {
 
   @OneToMany(() => Application, (a) => a.job)
   applications: Application[];
+
+  @ManyToMany(() => Specialty)
+  @JoinTable({
+    name: 'job_specialties',
+    joinColumn: { name: 'job_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'specialty_id', referencedColumnName: 'id' },
+  })
+  specialties: Specialty[];
 }
 
