@@ -37,6 +37,12 @@ export class User {
   @Column({ type: 'jsonb', default: {} })
   metadata: Record<string, any>;
 
+  @Column({ type: 'text', name: 'password_reset_token', nullable: true })
+  passwordResetToken: string | null;
+
+  @Column({ type: 'timestamptz', name: 'password_reset_expires', nullable: true })
+  passwordResetExpires: Date | null;
+
   @OneToOne(() => DoctorProfile, (dp) => dp.user)
   doctorProfile?: DoctorProfile;
 

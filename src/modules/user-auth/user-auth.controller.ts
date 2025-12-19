@@ -11,6 +11,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/password-reset.dto';
+
 class SignupDto {
   email: string;
   password: string;
@@ -111,5 +113,21 @@ export class UserAuthController {
     const redirectUrl = process.env.GOOGLE_FRONTEND_REDIRECT_LINK || 'http://localhost:3001/auth/callback';
     const url = `${redirectUrl}?token=${encodeURIComponent(result.access_token)}`;
     return res.redirect(url);
+  }
+
+  @AllowUnauthorized()
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request password reset email' })
+  @ApiOkResponse({ description: 'Password reset email sent if account exists' })
+  async forgotPassword(@Body() body: ForgotPasswordDto) {
+    return this.auth.forgotPassword(body.email);
+  }
+
+  @AllowUnauthorized()
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password using token from email' })
+  @ApiOkResponse({ description: 'Password successfully reset' })
+  async resetPassword(@Body() body: ResetPasswordDto) {
+    return this.auth.resetPassword(body.token, body.newPassword);
   }
 }
