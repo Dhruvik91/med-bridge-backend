@@ -35,7 +35,7 @@ export class DoctorProfile {
   @Column({ type: 'int', name: 'experience_years', nullable: true })
   experienceYears: number | null;
 
-  @Column({ type: 'text', array: true, default: () => "'{}'" })
+  @Column({ type: 'uuid', array: true, default: () => "'{}'" })
   qualifications: string[];
 
   @Column({ type: 'uuid', array: true, default: () => "'{}'" })
