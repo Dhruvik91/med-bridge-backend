@@ -60,9 +60,6 @@ export class Job {
   @JoinColumn({ name: 'location_id' })
   location: Location | null;
 
-  @Column({ type: 'boolean', default: false })
-  remote: boolean;
-
   @Column({ type: 'enum', enum: JobType, enumName: 'job_type', default: JobType.full_time })
   jobType: JobType;
 
