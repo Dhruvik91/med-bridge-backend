@@ -5,6 +5,7 @@ import { Job } from '../../database/entities/job.entity';
 import { Specialty } from '../../database/entities/specialty.entity';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { GetJobsQueryDto } from './dto/get-jobs-query.dto';
 
 @Injectable()
 export class JobsService {
@@ -15,14 +16,92 @@ export class JobsService {
     private readonly specialtyRepo: Repository<Specialty>,
   ) { }
 
-  async findAll(page = 1, limit = 20) {
+  async findAll(query: GetJobsQueryDto) {
+    const {
+      page = 1,
+      limit = 20,
+      q,
+      location,
+      jobType,
+      salaryMin,
+      salaryMax,
+      experienceMin,
+      experienceMax,
+      specialtyIds,
+      postedWithin,
+    } = query;
+
     const take = limit;
     const skip = (page - 1) * limit;
-    const [items, total] = await this.repo.findAndCount({
-      relations: ['employerProfile', 'organization', 'location', 'postedBy', 'applications', 'specialties'],
-      take,
-      skip,
-    });
+
+    const queryBuilder = this.repo.createQueryBuilder('job')
+      .leftJoinAndSelect('job.employerProfile', 'employerProfile')
+      .leftJoinAndSelect('job.organization', 'organization')
+      .leftJoinAndSelect('job.location', 'location')
+      .leftJoinAndSelect('job.postedBy', 'postedBy')
+      .leftJoinAndSelect('job.applications', 'applications')
+      .leftJoinAndSelect('job.specialties', 'specialties')
+      .where('job.status = :status', { status: 'published' });
+
+    if (q) {
+      queryBuilder.andWhere(
+        '(LOWER(job.title) LIKE LOWER(:q) OR LOWER(job.description) LIKE LOWER(:q) OR EXISTS (SELECT 1 FROM job_specialties js JOIN specialties s ON js.specialty_id = s.id WHERE js.job_id = job.id AND LOWER(s.name) LIKE LOWER(:q)))',
+        { q: `%${q}%` },
+      );
+    }
+
+    if (location) {
+      queryBuilder.andWhere(
+        '(LOWER(location.city) LIKE LOWER(:loc) OR LOWER(location.state) LIKE LOWER(:loc) OR LOWER(location.country) LIKE LOWER(:loc))',
+        { loc: `%${location}%` },
+      );
+    }
+
+    if (jobType) {
+      queryBuilder.andWhere('job.jobType = :jobType', { jobType });
+    }
+
+    if (salaryMin !== undefined) {
+      queryBuilder.andWhere('job.salaryMin >= :salaryMin', { salaryMin });
+    }
+
+    if (salaryMax !== undefined) {
+      queryBuilder.andWhere('job.salaryMax <= :salaryMax', { salaryMax });
+    }
+
+    if (experienceMin !== undefined) {
+      queryBuilder.andWhere('job.experienceMin >= :experienceMin', { experienceMin });
+    }
+
+    if (experienceMax !== undefined) {
+      queryBuilder.andWhere('job.experienceMax <= :experienceMax', { experienceMax });
+    }
+
+    if (specialtyIds && specialtyIds.length > 0) {
+      queryBuilder.andWhere('specialties.id IN (:...specialtyIds)', { specialtyIds });
+    }
+
+    if (postedWithin) {
+      const now = new Date();
+      let dateLimit: Date;
+      if (postedWithin === '24h') {
+        dateLimit = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      } else if (postedWithin === '7d') {
+        dateLimit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (postedWithin === '30d') {
+        dateLimit = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      }
+      if (dateLimit) {
+        queryBuilder.andWhere('job.publishedAt >= :dateLimit', { dateLimit });
+      }
+    }
+
+    const [items, total] = await queryBuilder
+      .take(take)
+      .skip(skip)
+      .orderBy('job.publishedAt', 'DESC')
+      .getManyAndCount();
+
     return { items, total, page, limit };
   }
 

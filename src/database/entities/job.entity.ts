@@ -82,6 +82,12 @@ export class Job {
   @Column({ type: 'int', name: 'max_applications', nullable: true })
   maxApplications: number | null;
 
+  @Column({ type: 'int', name: 'experience_min', nullable: true })
+  experienceMin: number | null;
+
+  @Column({ type: 'int', name: 'experience_max', nullable: true })
+  experienceMax: number | null;
+
   @Column({ type: 'bigint', name: 'views_count', default: 0 })
   viewsCount: number;
 
