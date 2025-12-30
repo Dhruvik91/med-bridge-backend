@@ -46,6 +46,7 @@ async function bootstrap() {
   );
 
   app.useGlobalGuards(new JwtAuthGuard(reflector));
+  app.setGlobalPrefix('api');
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Med Bridge API')

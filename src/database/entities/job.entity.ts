@@ -1,9 +1,10 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { EmployerProfile } from './employer-profile.entity';
 import { Organization } from './organization.entity';
 import { Location } from './location.entity';
 import { User } from './user.entity';
 import { Application } from './application.entity';
+import { Specialty } from './specialty.entity';
 import { JobStatus, JobType } from './enums';
 
 @Entity({ name: 'jobs', schema: 'public' })
@@ -59,9 +60,6 @@ export class Job {
   @JoinColumn({ name: 'location_id' })
   location: Location | null;
 
-  @Column({ type: 'boolean', default: false })
-  remote: boolean;
-
   @Column({ type: 'enum', enum: JobType, enumName: 'job_type', default: JobType.full_time })
   jobType: JobType;
 
@@ -83,6 +81,12 @@ export class Job {
 
   @Column({ type: 'int', name: 'max_applications', nullable: true })
   maxApplications: number | null;
+
+  @Column({ type: 'int', name: 'experience_min', nullable: true })
+  experienceMin: number | null;
+
+  @Column({ type: 'int', name: 'experience_max', nullable: true })
+  experienceMax: number | null;
 
   @Column({ type: 'bigint', name: 'views_count', default: 0 })
   viewsCount: number;
@@ -107,5 +111,13 @@ export class Job {
 
   @OneToMany(() => Application, (a) => a.job)
   applications: Application[];
+
+  @ManyToMany(() => Specialty)
+  @JoinTable({
+    name: 'job_specialties',
+    joinColumn: { name: 'job_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'specialty_id', referencedColumnName: 'id' },
+  })
+  specialties: Specialty[];
 }
 

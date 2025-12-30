@@ -10,7 +10,6 @@ export enum JobType {
   contract = 'contract',
   temporary = 'temporary',
   internship = 'internship',
-  remote = 'remote',
 }
 
 export enum JobStatus {

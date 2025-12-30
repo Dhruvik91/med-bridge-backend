@@ -12,6 +12,7 @@ import { DoctorProfileModule } from './modules/doctor-profile/doctor-profile.mod
 import { EmployerProfileModule } from './modules/employer-profile/employer-profile.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { SpecialtiesModule } from './modules/specialties/specialties.module';
+import { QualificationsModule } from './modules/qualifications/qualifications.module';
 import { LocationsModule } from './modules/locations/locations.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
@@ -40,6 +41,7 @@ import { UserAuthModule } from './modules/user-auth/user-auth.module';
 
     // Job board modules
     SpecialtiesModule,
+    QualificationsModule,
     LocationsModule,
     JobsModule,
     ApplicationsModule,

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { GetJobsQueryDto } from './dto/get-jobs-query.dto';
 import {
   ApiCreatedResponseEnvelope,
   ApiOkResponseEnvelope,
@@ -20,14 +21,13 @@ import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
 @ApiBearerAuth()
 @Controller('jobs')
 export class JobsController {
-  constructor(private readonly service: JobsService) {}
+  constructor(private readonly service: JobsService) { }
 
   @Get()
   @ApiOperation({ summary: 'List all jobs' })
   @ApiOkResponseEnvelope(Job, true)
-  findAll(@Query() pagination: PaginationQueryDto) {
-    const { page, limit } = pagination;
-    return this.service.findAll(page, limit);
+  findAll(@Query() query: GetJobsQueryDto) {
+    return this.service.findAll(query);
   }
 
   @Get('employer/:employerProfileId')

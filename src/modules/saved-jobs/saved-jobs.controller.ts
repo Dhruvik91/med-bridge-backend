@@ -8,7 +8,7 @@ import {
   ApiOkResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
-import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
+import { GetSavedJobsQueryDto } from './dto/get-saved-jobs-query.dto';
 
 @ApiTags('Saved Jobs')
 @ApiBearerAuth()
@@ -21,10 +21,9 @@ export class SavedJobsController {
   @ApiOkResponseEnvelope(SavedJob, true)
   findByUser(
     @Param('userId') userId: string,
-    @Query() pagination: PaginationQueryDto,
+    @Query() query: GetSavedJobsQueryDto,
   ) {
-    const { page, limit } = pagination;
-    return this.service.findByUser(userId, page, limit);
+    return this.service.findByUser(userId, query);
   }
 
   @Post()

@@ -77,11 +77,6 @@ export class CreateJobDto {
   @IsUUID()
   locationId?: string;
 
-  @ApiProperty({ default: false })
-  @IsOptional()
-  @IsBoolean()
-  remote?: boolean;
-
   @ApiProperty({ required: false, enum: JobType, default: JobType.full_time })
   @IsOptional()
   @IsEnum(JobType)
@@ -117,4 +112,10 @@ export class CreateJobDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, any>;
+
+  @ApiProperty({ type: [String], required: false, format: 'uuid' })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  specialtyIds?: string[];
 }

@@ -13,6 +13,7 @@ import { Attachment } from './entities/attachment.entity';
 import { Message } from './entities/message.entity';
 import { Notification } from './entities/notification.entity';
 import { AuditLog } from './entities/audit-log.entity';
+import { Qualification } from './entities/qualification.entity';
 
 export const AllEntities = [
   User,
@@ -30,8 +31,9 @@ export const AllEntities = [
   Message,
   Notification,
   AuditLog,
+  Qualification,
 ];
 
 export const CustomRepository = [
- 
+
 ];
