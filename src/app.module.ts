@@ -22,6 +22,7 @@ import { AttachmentsModule } from './modules/attachments/attachments.module';
 import { AwsModule } from './modules/aws/aws.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { UserAuthModule } from './modules/user-auth/user-auth.module';
+import { AdminModule } from './modules/admin/admin.module';
 // import { MessagesModule } from './modules/messages/messages.module';
 
 @Module({
@@ -33,6 +34,7 @@ import { UserAuthModule } from './modules/user-auth/user-auth.module';
     // Core modules
     UsersModule,
     UserAuthModule,
+    AdminModule,
 
     // Profile modules
     DoctorProfileModule,
