@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# set -euo pipefail
 
 CONTAINER_NAME="med-bridge-conatiner"
 IMAGE_NAME="med-bridge-image"
