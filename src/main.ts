@@ -2,7 +2,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { FailureResponseTransformer } from './core/exception-filters/failure-exception';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import { SuccessResponseTransformer } from './core/interceptor/success-response-interceptor';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './modules/auth/Guards/jwt-guard';
@@ -13,25 +13,29 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   const config = app.get(ConfigService);
 
+  // app.enableCors({
+  //   origin: (origin, callback) => {
+  //     const allowed = config.get<string>('CORS_ORIGIN');
+  //     if (!allowed) {
+  //       callback(null, true);
+  //       return;
+  //     }
+  //     const list = allowed.split(',').map((o) => o.trim());
+  //     if (!origin || list.includes(origin)) {
+  //       callback(null, true);
+  //     } else {
+  //       callback(new Error('Not allowed by CORS'), false);
+  //     }
+  //   },
+  //   credentials: true,
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  //   allowedHeaders: 'Content-Type, Authorization',
+  // });
+  // Now for just testing
   app.enableCors({
-    origin: (origin, callback) => {
-      const allowed = config.get<string>('CORS_ORIGIN');
-      if (!allowed) {
-        callback(null, true);
-        return;
-      }
-      const list = allowed.split(',').map((o) => o.trim());
-      if (!origin || list.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'), false);
-      }
-    },
-    credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization',
+    origin: '*',
   });
-
+  
   app.use(cookieParser());
   app.useGlobalFilters(new FailureResponseTransformer());
   app.useGlobalInterceptors(
