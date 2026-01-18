@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { UserRole } from './enums';
 import { DoctorProfile } from './doctor-profile.entity';
 import { EmployerProfile } from './employer-profile.entity';
@@ -13,6 +14,7 @@ export class User {
   @Column({ type: 'text', unique: true })
   email: string;
 
+  @Exclude()
   @Column({ type: 'text', name: 'password_hash', nullable: true })
   passwordHash: string | null;
 
@@ -37,6 +39,7 @@ export class User {
   @Column({ type: 'jsonb', default: {} })
   metadata: Record<string, any>;
 
+  @Exclude()
   @Column({ type: 'text', name: 'password_reset_token', nullable: true })
   passwordResetToken: string | null;
 
