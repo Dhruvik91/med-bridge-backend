@@ -24,7 +24,7 @@ ENV NODE_ENV=production
 
 # Install only production dependencies
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 # Copy compiled app
 COPY --from=builder /app/dist ./dist
