@@ -32,9 +32,14 @@ async function bootstrap() {
   //   allowedHeaders: 'Content-Type, Authorization',
   // });
   // Now for just testing
-  app.enableCors({
-    origin: '*',
-  });
+ // app.enableCors({
+   // origin: '*',
+  //});
+app.enableCors({
+  origin: true,   // reflect request origin
+  credentials: true,
+});
+
   
   app.use(cookieParser());
   app.useGlobalFilters(new FailureResponseTransformer());
