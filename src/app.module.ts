@@ -8,9 +8,12 @@ import { TypeOrmConnectionModule } from './database/typeorm-root.module';
 import { DatabaseModule } from './database/database.module';
 
 import { UsersModule } from './modules/users/users.module';
-import { DoctorProfileModule } from './modules/doctor-profile/doctor-profile.module';
+import { CandidateProfilesModule } from './modules/candidate-profiles/candidate-profiles.module';
 import { EmployerProfileModule } from './modules/employer-profile/employer-profile.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { PillarsModule } from './modules/pillars/pillars.module';
+import { JobRolesModule } from './modules/job-roles/job-roles.module';
+import { SkillsModule } from './modules/skills/skills.module';
 import { SpecialtiesModule } from './modules/specialties/specialties.module';
 import { QualificationsModule } from './modules/qualifications/qualifications.module';
 import { LocationsModule } from './modules/locations/locations.module';
@@ -37,11 +40,14 @@ import { AdminModule } from './modules/admin/admin.module';
     AdminModule,
 
     // Profile modules
-    DoctorProfileModule,
+    CandidateProfilesModule,
     EmployerProfileModule,
     OrganizationsModule,
 
     // Job board modules
+    PillarsModule,
+    JobRolesModule,
+    SkillsModule,
     SpecialtiesModule,
     QualificationsModule,
     LocationsModule,

@@ -1,10 +1,13 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { EmployerProfile } from './employer-profile.entity';
 import { Organization } from './organization.entity';
 import { Location } from './location.entity';
 import { User } from './user.entity';
 import { Application } from './application.entity';
 import { Specialty } from './specialty.entity';
+import { Pillar } from './pillar.entity';
+import { JobRole } from './job-role.entity';
+import { Skill } from './skill.entity';
 import { JobStatus, JobType } from './enums';
 
 @Entity({ name: 'jobs', schema: 'public' })
@@ -44,11 +47,31 @@ export class Job {
   @Column({ type: 'text', array: true, default: () => "'{}'" })
   perks: string[];
 
-  @Column({ type: 'numeric', precision: 12, scale: 2, name: 'salary_min', nullable: true })
-  salaryMin: string | null;
+  @Column({
+    type: 'numeric',
+    precision: 12,
+    scale: 2,
+    name: 'salary_min',
+    nullable: true,
+    transformer: {
+      to: (value: number | null) => value,
+      from: (value: string | null) => (value ? parseFloat(value) : null),
+    },
+  })
+  salaryMin: number | null;
 
-  @Column({ type: 'numeric', precision: 12, scale: 2, name: 'salary_max', nullable: true })
-  salaryMax: string | null;
+  @Column({
+    type: 'numeric',
+    precision: 12,
+    scale: 2,
+    name: 'salary_max',
+    nullable: true,
+    transformer: {
+      to: (value: number | null) => value,
+      from: (value: string | null) => (value ? parseFloat(value) : null),
+    },
+  })
+  salaryMax: number | null;
 
   @Column({ type: 'text', default: 'INR' })
   currency: string;
@@ -100,7 +123,24 @@ export class Job {
   @Column({ type: 'jsonb', default: {} })
   metadata: Record<string, any>;
 
+  @Column({ type: 'uuid', name: 'pillar_id', nullable: true })
+  @Index()
+  pillarId: string | null;
+
+  @ManyToOne(() => Pillar, (p) => p.jobs, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'pillar_id' })
+  pillar: Pillar | null;
+
+  @Column({ type: 'uuid', name: 'job_role_id', nullable: true })
+  @Index()
+  jobRoleId: string | null;
+
+  @ManyToOne(() => JobRole, (jr) => jr.jobs, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'job_role_id' })
+  jobRole: JobRole | null;
+
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  @Index()
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
@@ -119,5 +159,13 @@ export class Job {
     inverseJoinColumn: { name: 'specialty_id', referencedColumnName: 'id' },
   })
   specialties: Specialty[];
+
+  @ManyToMany(() => Skill)
+  @JoinTable({
+    name: 'job_skills',
+    joinColumn: { name: 'job_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'skill_id', referencedColumnName: 'id' },
+  })
+  skills: Skill[];
 }
 

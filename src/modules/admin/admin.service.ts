@@ -42,7 +42,7 @@ export class AdminService {
     }
 
     if (role) {
-      queryBuilder.andWhere('user.role = :role', { role });
+      queryBuilder.andWhere('user.userType = :role', { role });
     }
 
     if (isActive !== undefined) {
@@ -91,7 +91,7 @@ export class AdminService {
 
     const queryBuilder = this.doctorProfileRepo.createQueryBuilder('profile')
       .leftJoinAndSelect('profile.user', 'user')
-      .where('user.role IN (:...roles)', { roles: ['candidate', 'doctor'] });
+      .where('user.userType IN (:...roles)', { roles: ['candidate', 'doctor'] });
 
     if (q) {
       queryBuilder.andWhere(
@@ -139,7 +139,7 @@ export class AdminService {
 
     const queryBuilder = this.employerProfileRepo.createQueryBuilder('profile')
       .leftJoinAndSelect('profile.user', 'user')
-      .where('user.role IN (:...roles)', { roles: ['employer', 'hospital'] });
+      .where('user.userType IN (:...roles)', { roles: ['employer', 'hospital'] });
 
     if (q) {
       queryBuilder.andWhere(
@@ -286,8 +286,8 @@ export class AdminService {
   async getStats() {
     const [totalUsers, totalCandidates, totalEmployers, totalJobs, totalApplications] = await Promise.all([
       this.userRepo.count(),
-      this.userRepo.count({ where: { role: UserRole.candidate } }),
-      this.userRepo.count({ where: { role: UserRole.employer } }),
+      this.userRepo.count({ where: { userType: UserRole.candidate } }),
+      this.userRepo.count({ where: { userType: UserRole.employer } }),
       this.jobRepo.count(),
       this.applicationRepo.count(),
     ]);

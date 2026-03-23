@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Patch, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Patch, Delete, Query, ParseUUIDPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '../../database/entities/user.entity';
 import {
@@ -12,9 +12,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ApiCreatedResponseEnvelope,
   ApiOkResponseEnvelope,
+  ApiPaginatedResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
-import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
+import { PageOptionsDto } from '../../core/dto/page-options.dto';
+import { PageDto } from '../../core/dto/page.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -24,17 +26,16 @@ export class UsersController {
 
   @Get()
   @ApiOperation({ summary: 'List all users' })
-  @ApiOkResponseEnvelope(User, true)
-  findAll(@Query() pagination: PaginationQueryDto) {
-    const { page, limit } = pagination;
-    return this.usersService.findAll(page, limit);
+  @ApiPaginatedResponseEnvelope(User)
+  findAll(@Query() pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {
+    return this.usersService.findAll(pageOptionsDto);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiOkResponseEnvelope(User)
   @ApiNotFoundResponse({ description: 'User not found' })
-  findOne(@Param('id') id: string): Promise<User | null> {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
     return this.usersService.findOne(id);
   }
 
@@ -49,14 +50,14 @@ export class UsersController {
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiOkResponseEnvelope(User)
   @ApiNotFoundResponse({ description: 'User not found' })
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto): Promise<User> {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateUserDto): Promise<User> {
     return this.usersService.update(id, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a user' })
   @ApiOkResponseEnvelope(EmptyResponseDto)
-  remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.usersService.remove(id);
   }
 }

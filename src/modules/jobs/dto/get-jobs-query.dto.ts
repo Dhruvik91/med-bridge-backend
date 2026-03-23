@@ -2,7 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, IsNumber, IsArray, IsUUID, Min } from 'class-validator';
 import { JobType } from '../../../database/entities/enums';
-import { PaginationQueryDto } from '../../../core/dto/pagination-query.dto';
+import { PageOptionsDto } from '../../../core/dto/page-options.dto';
 
 export enum PostedWithin {
     '24h' = '24h',
@@ -10,7 +10,7 @@ export enum PostedWithin {
     '30d' = '30d',
 }
 
-export class GetJobsQueryDto extends PaginationQueryDto {
+export class GetJobsQueryDto extends PageOptionsDto {
     @ApiPropertyOptional({ description: 'Search query for title, description, or specialty' })
     @IsOptional()
     @IsString()
@@ -53,6 +53,16 @@ export class GetJobsQueryDto extends PaginationQueryDto {
     @IsNumber()
     @Min(0)
     experienceMax?: number;
+
+    @ApiPropertyOptional({ description: 'Filter by pillar ID' })
+    @IsOptional()
+    @IsUUID()
+    pillarId?: string;
+
+    @ApiPropertyOptional({ description: 'Filter by job role ID' })
+    @IsOptional()
+    @IsUUID()
+    jobRoleId?: string;
 
     @ApiPropertyOptional({ description: 'Filter by specialty IDs' })
     @IsOptional()

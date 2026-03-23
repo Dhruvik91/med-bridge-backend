@@ -11,7 +11,12 @@ export class MessagesService {
   ) {}
 
   findAllForUser(userId: string) {
-    return this.repo.find({ where: [{ senderId: userId }, { receiverId: userId }] });
+    return this.repo.createQueryBuilder('message')
+      .innerJoin('message.conversation', 'conversation')
+      .innerJoin('conversation.participants', 'participant')
+      .where('participant.userId = :userId', { userId })
+      .orderBy('message.createdAt', 'ASC')
+      .getMany();
   }
 
   async send(dto: Partial<Message>) {

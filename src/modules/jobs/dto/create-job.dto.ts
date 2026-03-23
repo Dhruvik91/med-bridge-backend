@@ -57,15 +57,17 @@ export class CreateJobDto {
   @IsString({ each: true })
   perks?: string[];
 
-  @ApiProperty({ required: false, description: 'Minimum salary as decimal string' })
+  @ApiProperty({ required: false, description: 'Minimum salary' })
   @IsOptional()
-  @IsString()
-  salaryMin?: string;
+  @IsNumber()
+  @Min(0)
+  salaryMin?: number;
 
-  @ApiProperty({ required: false, description: 'Maximum salary as decimal string' })
+  @ApiProperty({ required: false, description: 'Maximum salary' })
   @IsOptional()
-  @IsString()
-  salaryMax?: string;
+  @IsNumber()
+  @Min(0)
+  salaryMax?: number;
 
   @ApiProperty({ required: false, default: 'INR' })
   @IsOptional()
@@ -77,41 +79,19 @@ export class CreateJobDto {
   @IsUUID()
   locationId?: string;
 
-  @ApiProperty({ required: false, enum: JobType, default: JobType.full_time })
-  @IsOptional()
-  @IsEnum(JobType)
-  jobType?: JobType;
-
-  @ApiProperty({ required: false, format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid' })
   @IsUUID()
-  postedByUserId?: string;
+  pillarId: string;
 
-  @ApiProperty({ required: false, enum: JobStatus, default: JobStatus.draft })
-  @IsOptional()
-  @IsEnum(JobStatus)
-  status?: JobStatus;
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  jobRoleId: string;
 
-  @ApiProperty({ required: false, format: 'date-time' })
+  @ApiProperty({ type: [String], required: false, format: 'uuid' })
   @IsOptional()
-  @IsDateString()
-  publishedAt?: string;
-
-  @ApiProperty({ required: false, format: 'date-time' })
-  @IsOptional()
-  @IsDateString()
-  applicationDeadline?: string;
-
-  @ApiProperty({ required: false, minimum: 1 })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  maxApplications?: number;
-
-  @ApiProperty({ required: false, type: 'object' })
-  @IsOptional()
-  @IsObject()
-  metadata?: Record<string, any>;
+  @IsArray()
+  @IsUUID('4', { each: true })
+  skillIds?: string[];
 
   @ApiProperty({ type: [String], required: false, format: 'uuid' })
   @IsOptional()

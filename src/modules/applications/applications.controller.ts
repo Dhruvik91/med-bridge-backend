@@ -12,9 +12,11 @@ import { UpdateApplicationDto } from './dto/update-application.dto';
 import {
   ApiCreatedResponseEnvelope,
   ApiOkResponseEnvelope,
+  ApiPaginatedResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
-import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
+import { PageOptionsDto } from '../../core/dto/page-options.dto';
+import { PageDto } from '../../core/dto/page.dto';
 
 @ApiTags('Applications')
 @ApiBearerAuth()
@@ -24,32 +26,29 @@ export class ApplicationsController {
 
   @Get()
   @ApiOperation({ summary: 'List all applications' })
-  @ApiOkResponseEnvelope(Application, true)
-  findAll(@Query() pagination: PaginationQueryDto) {
-    const { page, limit } = pagination;
-    return this.service.findAll(page, limit);
+  @ApiPaginatedResponseEnvelope(Application)
+  findAll(@Query() pageOptions: PageOptionsDto): Promise<PageDto<Application>> {
+    return this.service.findAll(pageOptions);
   }
 
   @Get('candidate/:candidateId')
   @ApiOperation({ summary: 'List applications for a candidate' })
-  @ApiOkResponseEnvelope(Application, true)
+  @ApiPaginatedResponseEnvelope(Application)
   findByCandidate(
     @Param('candidateId') candidateId: string,
-    @Query() pagination: PaginationQueryDto,
-  ) {
-    const { page, limit } = pagination;
-    return this.service.findByCandidate(candidateId, page, limit);
+    @Query() pageOptions: PageOptionsDto,
+  ): Promise<PageDto<Application>> {
+    return this.service.findByCandidate(candidateId, pageOptions);
   }
 
   @Get('job/:jobId')
   @ApiOperation({ summary: 'List applications for a job' })
-  @ApiOkResponseEnvelope(Application, true)
+  @ApiPaginatedResponseEnvelope(Application)
   findByJob(
     @Param('jobId') jobId: string,
-    @Query() pagination: PaginationQueryDto,
-  ) {
-    const { page, limit } = pagination;
-    return this.service.findByJob(jobId, page, limit);
+    @Query() pageOptions: PageOptionsDto,
+  ): Promise<PageDto<Application>> {
+    return this.service.findByJob(jobId, pageOptions);
   }
 
   @Get(':id')

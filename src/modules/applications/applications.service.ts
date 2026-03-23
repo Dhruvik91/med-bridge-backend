@@ -4,10 +4,13 @@ import { Repository } from 'typeorm';
 import { Application } from '../../database/entities/application.entity';
 import { Job } from '../../database/entities/job.entity';
 import { User } from '../../database/entities/user.entity';
-import { DoctorProfile } from '../../database/entities/doctor-profile.entity';
+import { CandidateProfile } from '../../database/entities/candidate-profile.entity';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApplicationStatus } from '../../database/entities/enums';
+import { PageOptionsDto } from '../../core/dto/page-options.dto';
+import { PageMetaDto } from '../../core/dto/page-meta.dto';
+import { PageDto } from '../../core/dto/page.dto';
 
 @Injectable()
 export class ApplicationsService {
@@ -18,19 +21,22 @@ export class ApplicationsService {
     private readonly jobRepo: Repository<Job>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    @InjectRepository(DoctorProfile)
-    private readonly doctorProfileRepo: Repository<DoctorProfile>,
+    @InjectRepository(CandidateProfile)
+    private readonly candidateProfileRepo: Repository<CandidateProfile>,
   ) { }
 
-  async findAll(page = 1, limit = 20) {
-    const take = limit;
-    const skip = (page - 1) * limit;
-    const [items, total] = await this.repo.findAndCount({
-      relations: ['job', 'candidate', 'candidateProfile'],
-      take,
-      skip,
-    });
-    return { items, total, page, limit };
+  async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<Application>> {
+    const queryBuilder = this.repo.createQueryBuilder('application')
+      .leftJoinAndSelect('application.job', 'job')
+      .leftJoinAndSelect('application.candidate', 'candidate')
+      .leftJoinAndSelect('application.candidateProfile', 'candidateProfile')
+      .orderBy('application.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
+
+    const [entities, itemCount] = await queryBuilder.getManyAndCount();
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+    return new PageDto(entities, pageMetaDto);
   }
 
   findOne(id: string) {
@@ -40,28 +46,32 @@ export class ApplicationsService {
     });
   }
 
-  async findByCandidate(candidateId: string, page = 1, limit = 20) {
-    const take = limit;
-    const skip = (page - 1) * limit;
-    const [items, total] = await this.repo.findAndCount({
-      where: { candidateId },
-      relations: ['job', 'candidateProfile'],
-      take,
-      skip,
-    });
-    return { items, total, page, limit };
+  async findByCandidate(candidateId: string, pageOptionsDto: PageOptionsDto): Promise<PageDto<Application>> {
+    const queryBuilder = this.repo.createQueryBuilder('application')
+      .where('application.candidateId = :candidateId', { candidateId })
+      .leftJoinAndSelect('application.job', 'job')
+      .leftJoinAndSelect('application.candidateProfile', 'candidateProfile')
+      .orderBy('application.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
+
+    const [entities, itemCount] = await queryBuilder.getManyAndCount();
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+    return new PageDto(entities, pageMetaDto);
   }
 
-  async findByJob(jobId: string, page = 1, limit = 20) {
-    const take = limit;
-    const skip = (page - 1) * limit;
-    const [items, total] = await this.repo.findAndCount({
-      where: { jobId },
-      relations: ['candidate', 'candidateProfile'],
-      take,
-      skip,
-    });
-    return { items, total, page, limit };
+  async findByJob(jobId: string, pageOptionsDto: PageOptionsDto): Promise<PageDto<Application>> {
+    const queryBuilder = this.repo.createQueryBuilder('application')
+      .where('application.jobId = :jobId', { jobId })
+      .leftJoinAndSelect('application.candidate', 'candidate')
+      .leftJoinAndSelect('application.candidateProfile', 'candidateProfile')
+      .orderBy('application.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
+
+    const [entities, itemCount] = await queryBuilder.getManyAndCount();
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+    return new PageDto(entities, pageMetaDto);
   }
 
   async create(dto: CreateApplicationDto) {
@@ -76,13 +86,13 @@ export class ApplicationsService {
     }
 
     if (dto.candidateProfileId) {
-      const profile = await this.doctorProfileRepo.findOne({ where: { id: dto.candidateProfileId } });
+      const profile = await this.candidateProfileRepo.findOne({ where: { id: dto.candidateProfileId } });
       if (!profile) {
-        throw new NotFoundException(`Doctor Profile with ID ${dto.candidateProfileId} not found`);
+        throw new NotFoundException(`Candidate Profile with ID ${dto.candidateProfileId} not found`);
       }
     } else {
       // Auto-link profile if not provided
-      const profile = await this.doctorProfileRepo.findOne({ where: { userId: dto.candidateId } });
+      const profile = await this.candidateProfileRepo.findOne({ where: { userId: dto.candidateId } });
       if (profile) {
         dto.candidateProfileId = profile.id;
       }

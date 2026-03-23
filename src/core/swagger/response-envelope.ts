@@ -71,3 +71,36 @@ export const ApiCreatedResponseEnvelope = <TModel extends Type<unknown>>(
       },
     }),
   );
+
+export const ApiPaginatedResponseEnvelope = <TModel extends Type<unknown>>(
+  model: TModel,
+) =>
+  applyDecorators(
+    ApiExtraModels(ResponseEnvelope, model),
+    ApiOkResponse({
+      schema: {
+        allOf: [
+          { $ref: getSchemaPath(ResponseEnvelope) },
+          {
+            properties: {
+              data: {
+                type: 'array',
+                items: { $ref: getSchemaPath(model) },
+              },
+              meta: {
+                type: 'object',
+                properties: {
+                  page: { type: 'number' },
+                  take: { type: 'number' },
+                  itemCount: { type: 'number' },
+                  pageCount: { type: 'number' },
+                  hasPreviousPage: { type: 'boolean' },
+                  hasNextPage: { type: 'boolean' },
+                },
+              },
+            },
+          },
+        ],
+      },
+    }),
+  );

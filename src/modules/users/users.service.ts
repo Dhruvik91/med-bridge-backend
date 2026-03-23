@@ -2,6 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../database/entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { PageOptionsDto } from '../../core/dto/page-options.dto';
+import { PageDto } from '../../core/dto/page.dto';
+import { PageMetaDto } from '../../core/dto/page-meta.dto';
 
 @Injectable()
 export class UsersService {
@@ -10,30 +15,49 @@ export class UsersService {
     private readonly usersRepo: Repository<User>,
   ) {}
 
-  async findAll(page = 1, limit = 20) {
-    const take = limit;
-    const skip = (page - 1) * limit;
-    const [items, total] = await this.usersRepo.findAndCount({ take, skip });
-    return { items, total, page, limit };
+  async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {
+    const queryBuilder = this.usersRepo.createQueryBuilder('user');
+
+    if (pageOptionsDto.q) {
+      queryBuilder.where('user.email ILIKE :q', { q: `%${pageOptionsDto.q}%` });
+    }
+
+    queryBuilder
+      .orderBy('user.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
+
+    const [entities, itemCount] = await queryBuilder.getManyAndCount();
+
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+    return new PageDto(entities, pageMetaDto);
   }
 
-  findOne(id: string) {
-    return this.usersRepo.findOne({ where: { id } });
+  async findOne(id: string): Promise<User> {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
   }
 
-  async create(dto: Partial<User>) {
-    const entity = this.usersRepo.create(dto);
-    return await this.usersRepo.save(entity);
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepo.findOne({ where: { email } });
   }
 
-  async update(id: string, dto: Partial<User>) {
-    const existing = await this.usersRepo.findOne({ where: { id } });
-    if (!existing) throw new NotFoundException('User not found');
-    Object.assign(existing, dto);
-    return await this.usersRepo.save(existing);
+  async create(dto: CreateUserDto): Promise<User> {
+    const user = this.usersRepo.create(dto);
+    return await this.usersRepo.save(user);
   }
 
-  async remove(id: string) {
-    await this.usersRepo.delete(id);
+  async update(id: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+    this.usersRepo.merge(user, dto);
+    return await this.usersRepo.save(user);
+  }
+
+  async remove(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    await this.usersRepo.softRemove(user);
   }
 }

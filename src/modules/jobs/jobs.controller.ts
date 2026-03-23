@@ -13,9 +13,10 @@ import { GetJobsQueryDto } from './dto/get-jobs-query.dto';
 import {
   ApiCreatedResponseEnvelope,
   ApiOkResponseEnvelope,
+  ApiPaginatedResponseEnvelope,
   EmptyResponseDto,
 } from '../../core/swagger/response-envelope';
-import { PaginationQueryDto } from '../../core/dto/pagination-query.dto';
+import { PageDto } from '../../core/dto/page.dto';
 
 @ApiTags('Jobs')
 @ApiBearerAuth()
@@ -25,8 +26,8 @@ export class JobsController {
 
   @Get()
   @ApiOperation({ summary: 'List all jobs' })
-  @ApiOkResponseEnvelope(Job, true)
-  findAll(@Query() query: GetJobsQueryDto) {
+  @ApiPaginatedResponseEnvelope(Job)
+  findAll(@Query() query: GetJobsQueryDto): Promise<PageDto<Job>> {
     return this.service.findAll(query);
   }
 

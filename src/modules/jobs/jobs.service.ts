@@ -5,7 +5,10 @@ import { Job } from '../../database/entities/job.entity';
 import { Specialty } from '../../database/entities/specialty.entity';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
-import { GetJobsQueryDto } from './dto/get-jobs-query.dto';
+import { GetJobsQueryDto, PostedWithin } from './dto/get-jobs-query.dto';
+import { PageMetaDto } from '../../core/dto/page-meta.dto';
+import { PageDto } from '../../core/dto/page.dto';
+import { Skill } from '../../database/entities/skill.entity';
 
 @Injectable()
 export class JobsService {
@@ -14,12 +17,12 @@ export class JobsService {
     private readonly repo: Repository<Job>,
     @InjectRepository(Specialty)
     private readonly specialtyRepo: Repository<Specialty>,
+    @InjectRepository(Skill)
+    private readonly skillRepo: Repository<Skill>,
   ) { }
 
-  async findAll(query: GetJobsQueryDto) {
+  async findAll(query: GetJobsQueryDto): Promise<PageDto<Job>> {
     const {
-      page = 1,
-      limit = 20,
       q,
       location,
       jobType,
@@ -29,23 +32,26 @@ export class JobsService {
       experienceMax,
       specialtyIds,
       postedWithin,
+      pillarId,
+      jobRoleId,
+      order,
+      skip,
+      take,
     } = query;
-
-    const take = limit;
-    const skip = (page - 1) * limit;
 
     const queryBuilder = this.repo.createQueryBuilder('job')
       .leftJoinAndSelect('job.employerProfile', 'employerProfile')
       .leftJoinAndSelect('job.organization', 'organization')
       .leftJoinAndSelect('job.location', 'location')
       .leftJoinAndSelect('job.postedBy', 'postedBy')
-      .leftJoinAndSelect('job.applications', 'applications')
       .leftJoinAndSelect('job.specialties', 'specialties')
+      .leftJoinAndSelect('job.pillar', 'pillar')
+      .leftJoinAndSelect('job.jobRole', 'jobRole')
       .where('job.status = :status', { status: 'published' });
 
     if (q) {
       queryBuilder.andWhere(
-        '(LOWER(job.title) LIKE LOWER(:q) OR LOWER(job.description) LIKE LOWER(:q) OR EXISTS (SELECT 1 FROM job_specialties js JOIN specialties s ON js.specialty_id = s.id WHERE js.job_id = job.id AND LOWER(s.name) LIKE LOWER(:q)))',
+        '(LOWER(job.title) LIKE LOWER(:q) OR LOWER(job.description) LIKE LOWER(:q))',
         { q: `%${q}%` },
       );
     }
@@ -77,18 +83,26 @@ export class JobsService {
       queryBuilder.andWhere('job.experienceMax <= :experienceMax', { experienceMax });
     }
 
+    if (pillarId) {
+      queryBuilder.andWhere('job.pillarId = :pillarId', { pillarId });
+    }
+
+    if (jobRoleId) {
+      queryBuilder.andWhere('job.jobRoleId = :jobRoleId', { jobRoleId });
+    }
+
     if (specialtyIds && specialtyIds.length > 0) {
       queryBuilder.andWhere('specialties.id IN (:...specialtyIds)', { specialtyIds });
     }
 
     if (postedWithin) {
       const now = new Date();
-      let dateLimit: Date;
-      if (postedWithin === '24h') {
+      let dateLimit: Date | null = null;
+      if (postedWithin === PostedWithin['24h']) {
         dateLimit = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      } else if (postedWithin === '7d') {
+      } else if (postedWithin === PostedWithin['7d']) {
         dateLimit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      } else if (postedWithin === '30d') {
+      } else if (postedWithin === PostedWithin['30d']) {
         dateLimit = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       }
       if (dateLimit) {
@@ -96,13 +110,15 @@ export class JobsService {
       }
     }
 
-    const [items, total] = await queryBuilder
-      .take(take)
+    queryBuilder
+      .orderBy('job.publishedAt', order)
       .skip(skip)
-      .orderBy('job.publishedAt', 'DESC')
-      .getManyAndCount();
+      .take(take);
 
-    return { items, total, page, limit };
+    const [entities, itemCount] = await queryBuilder.getManyAndCount();
+
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto: query });
+    return new PageDto(entities, pageMetaDto);
   }
 
   findOne(id: string) {
@@ -149,11 +165,15 @@ export class JobsService {
   }
 
   async create(dto: CreateJobDto) {
-    const { specialtyIds, ...jobData } = dto;
+    const { specialtyIds, skillIds, ...jobData } = dto;
     const entity = this.repo.create(jobData);
 
     if (specialtyIds && specialtyIds.length > 0) {
       entity.specialties = await this.specialtyRepo.findByIds(specialtyIds);
+    }
+
+    if (skillIds && skillIds.length > 0) {
+      entity.skills = await this.skillRepo.findByIds(skillIds);
     }
 
     return await this.repo.save(entity);
@@ -162,11 +182,11 @@ export class JobsService {
   async update(id: string, dto: UpdateJobDto) {
     const existing = await this.repo.findOne({
       where: { id },
-      relations: ['specialties']
+      relations: ['specialties', 'skills']
     });
     if (!existing) throw new NotFoundException('Job not found');
 
-    const { specialtyIds, ...jobData } = dto;
+    const { specialtyIds, skillIds, ...jobData } = dto;
     Object.assign(existing, jobData);
 
     if (specialtyIds !== undefined) {
@@ -174,6 +194,14 @@ export class JobsService {
         existing.specialties = await this.specialtyRepo.findByIds(specialtyIds);
       } else {
         existing.specialties = [];
+      }
+    }
+
+    if (skillIds !== undefined) {
+      if (skillIds.length > 0) {
+        existing.skills = await this.skillRepo.findByIds(skillIds);
+      } else {
+        existing.skills = [];
       }
     }
 

@@ -15,13 +15,28 @@ export class SuccessResponseTransformer implements NestInterceptor {
     const response = httpContext.getResponse<Response>();
 
     return next.handle().pipe(
-      map((data) => ({
-        data,
-        message: [],
-        error: null,
-        statusCode: response.statusCode ?? 200,
-        isError: false,
-      })),
+      map((data) => {
+        // Handle Paginated Responses (PageDto)
+        if (data && data.data && data.meta) {
+          return {
+            data: data.data,
+            meta: data.meta,
+            message: [],
+            error: null,
+            statusCode: response.statusCode ?? 200,
+            isError: false,
+          };
+        }
+
+        // Handle Simple Responses
+        return {
+          data,
+          message: [],
+          error: null,
+          statusCode: response.statusCode ?? 200,
+          isError: false,
+        };
+      }),
       catchError((err) => {
         return throwError(() => err);
       }),

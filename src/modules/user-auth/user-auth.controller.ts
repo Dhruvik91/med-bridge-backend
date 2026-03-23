@@ -2,21 +2,41 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { UserAuthService } from './user-auth.service';
+import { User } from '../../database/entities/user.entity';
 import { UserRole } from '../../database/entities/enums';
 import { AllowUnauthorized } from '../auth/unauthorized/allow-unauthorixed';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiProperty,
   ApiTags,
 } from '@nestjs/swagger';
 
+import {
+  ApiCreatedResponseEnvelope,
+  ApiOkResponseEnvelope,
+  ApiPaginatedResponseEnvelope,
+  EmptyResponseDto,
+} from '../../core/swagger/response-envelope';
+
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/password-reset.dto';
 
+import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength } from 'class-validator';
+
 class SignupDto {
+  @ApiProperty({ example: 'candidate@example.com' })
+  @IsEmail()
   email: string;
+
+  @ApiProperty({ example: 'password123' })
+  @IsString()
+  @MinLength(6)
   password: string;
-  role: UserRole;
+
+  @ApiProperty({ enum: UserRole, example: UserRole.candidate })
+  @IsEnum(UserRole)
+  userType: UserRole;
 }
 
 @ApiTags('User Auth')
@@ -29,7 +49,7 @@ export class UserAuthController {
   @ApiOperation({ summary: 'Sign up a new user (candidate/employer)' })
   @ApiCreatedResponse({ description: 'User registered and JWT returned' })
   async signup(@Body() body: SignupDto, @Res({ passthrough: true }) res: Response) {
-    const result = await this.auth.signup(body.email, body.password, body.role);
+    const result = await this.auth.signup(body.email, body.password, body.userType);
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -63,7 +83,7 @@ export class UserAuthController {
   @UseGuards(AuthGuard('jwt-user'))
   @Get('me')
   @ApiOperation({ summary: 'Get current authenticated user profile' })
-  @ApiOkResponse({ description: 'Returns user information for current JWT' })
+  @ApiOkResponseEnvelope(User)
   async me(@Req() req: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload = (req as any).user as { id: string };
