@@ -26,6 +26,20 @@ import { AwsModule } from './modules/aws/aws.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { UserAuthModule } from './modules/user-auth/user-auth.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ConversationsModule } from './modules/conversations/conversations.module';
+import { CandidatePreferencesModule } from './modules/candidate-preferences/candidate-preferences.module';
+import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { ClinicalProfilesModule } from './modules/clinical-profiles/clinical-profiles.module';
+import { FinanceProfilesModule } from './modules/finance-profiles/finance-profiles.module';
+import { HRProfilesModule } from './modules/hr-profiles/hr-profiles.module';
+import { ITProfilesModule } from './modules/it-profiles/it-profiles.module';
+import { LegalProfilesModule } from './modules/legal-profiles/legal-profiles.module';
+import { MarketingProfilesModule } from './modules/marketing-profiles/marketing-profiles.module';
+import { OperationsProfilesModule } from './modules/operations-profiles/operations-profiles.module';
+import { QualityProfilesModule } from './modules/quality-profiles/quality-profiles.module';
+import { SupplyChainProfilesModule } from './modules/supply-chain-profiles/supply-chain-profiles.module';
+import { DoctorProfileModule } from './modules/doctor-profile/doctor-profile.module';
 // import { MessagesModule } from './modules/messages/messages.module';
 
 @Module({
@@ -41,8 +55,21 @@ import { AdminModule } from './modules/admin/admin.module';
 
     // Profile modules
     CandidateProfilesModule,
+    DoctorProfileModule,
     EmployerProfileModule,
     OrganizationsModule,
+    CandidatePreferencesModule,
+
+    // Department-specific profile modules
+    ClinicalProfilesModule,
+    FinanceProfilesModule,
+    HRProfilesModule,
+    ITProfilesModule,
+    LegalProfilesModule,
+    MarketingProfilesModule,
+    OperationsProfilesModule,
+    QualityProfilesModule,
+    SupplyChainProfilesModule,
 
     // Job board modules
     PillarsModule,
@@ -60,8 +87,11 @@ import { AdminModule } from './modules/admin/admin.module';
     AttachmentsModule,
     AwsModule,
     UploadsModule,
+    AuditLogsModule,
 
-    // Future: Messaging
+    // Communication modules
+    NotificationsModule,
+    ConversationsModule,
     // MessagesModule,
   ],
   controllers: [AppController],

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Job } from '../../database/entities/job.entity';
 import { Specialty } from '../../database/entities/specialty.entity';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -169,11 +169,11 @@ export class JobsService {
     const entity = this.repo.create(jobData);
 
     if (specialtyIds && specialtyIds.length > 0) {
-      entity.specialties = await this.specialtyRepo.findByIds(specialtyIds);
+      entity.specialties = await this.specialtyRepo.findBy({ id: In(specialtyIds) });
     }
 
     if (skillIds && skillIds.length > 0) {
-      entity.skills = await this.skillRepo.findByIds(skillIds);
+      entity.skills = await this.skillRepo.findBy({ id: In(skillIds) });
     }
 
     return await this.repo.save(entity);
@@ -191,7 +191,7 @@ export class JobsService {
 
     if (specialtyIds !== undefined) {
       if (specialtyIds.length > 0) {
-        existing.specialties = await this.specialtyRepo.findByIds(specialtyIds);
+        existing.specialties = await this.specialtyRepo.findBy({ id: In(specialtyIds) });
       } else {
         existing.specialties = [];
       }
@@ -199,7 +199,7 @@ export class JobsService {
 
     if (skillIds !== undefined) {
       if (skillIds.length > 0) {
-        existing.skills = await this.skillRepo.findByIds(skillIds);
+        existing.skills = await this.skillRepo.findBy({ id: In(skillIds) });
       } else {
         existing.skills = [];
       }
