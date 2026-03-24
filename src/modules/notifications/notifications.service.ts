@@ -93,7 +93,7 @@ export class NotificationsService {
 
   async remove(id: string): Promise<void> {
     const existing = await this.findOne(id);
-    await this.repo.remove(existing);
+    await this.repo.softRemove(existing);
   }
 
   async getUnreadCount(userId: string): Promise<number> {

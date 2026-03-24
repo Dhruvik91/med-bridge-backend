@@ -40,6 +40,6 @@ export class SupplyChainProfilesService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.repo.remove(await this.findOne(id));
+    await this.repo.softRemove(await this.findOne(id));
   }
 }

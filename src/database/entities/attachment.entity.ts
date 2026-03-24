@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 
 @Entity({ name: 'attachments', schema: 'public' })
+@Index(['ownerType', 'ownerId'])
 export class Attachment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -25,6 +26,7 @@ export class Attachment {
   sizeBytes: number | null;
 
   @Column({ type: 'uuid', name: 'uploaded_by', nullable: true })
+  @Index()
   uploadedBy: string | null;
 
   @ManyToOne(() => User, { onDelete: 'SET NULL' })
@@ -32,5 +34,15 @@ export class Attachment {
   uploader: User | null;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  @Index()
   createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at', nullable: true })
+  deletedAt: Date | null;
+
+  @Column({ type: 'jsonb', default: {} })
+  metadata: Record<string, any>;
 }
