@@ -7,6 +7,8 @@ import { CandidateProfile } from './candidate-profile.entity';
 import { ConversationParticipant } from './conversation-participant.entity';
 import { Message } from './message.entity';
 import { Notification } from './notification.entity';
+import { SavedJob } from './saved-job.entity';
+import { Application } from './application.entity';
 
 @Entity({ name: 'users', schema: 'public' })
 export class User {
@@ -70,4 +72,13 @@ export class User {
 
   @OneToMany(() => Notification, (n) => n.user)
   notifications: Notification[];
+
+  @OneToMany(() => SavedJob, (sj) => sj.user)
+  savedJobs: SavedJob[];
+
+  @OneToMany(() => Application, (a) => a.candidate)
+  applications: Application[];
+
+  @OneToMany(() => Message, (m) => m.sender)
+  sentMessages: Message[];
 }

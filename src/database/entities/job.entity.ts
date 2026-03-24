@@ -9,6 +9,8 @@ import { Pillar } from './pillar.entity';
 import { JobRole } from './job-role.entity';
 import { Skill } from './skill.entity';
 import { JobStatus, JobType } from './enums';
+import { SavedJob } from './saved-job.entity';
+import { Conversation } from './conversation.entity';
 
 @Entity({ name: 'jobs', schema: 'public' })
 export class Job {
@@ -151,6 +153,12 @@ export class Job {
 
   @OneToMany(() => Application, (a) => a.job)
   applications: Application[];
+
+  @OneToMany(() => SavedJob, (sj) => sj.job)
+  savedByUsers: SavedJob[];
+
+  @OneToMany(() => Conversation, (c) => c.job)
+  conversations: Conversation[];
 
   @ManyToMany(() => Specialty)
   @JoinTable({

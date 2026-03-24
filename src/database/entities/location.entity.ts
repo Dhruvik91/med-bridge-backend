@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity({ name: 'locations', schema: 'public' })
 @Index(['city', 'state', 'country'])
@@ -18,6 +18,9 @@ export class Location {
   @Index()
   country: string | null;
 
+  @Column({ type: 'text', name: 'postal_code', nullable: true })
+  postalCode: string | null;
+
   @Column({ type: 'double precision', nullable: true })
   latitude: number | null;
 
@@ -29,4 +32,10 @@ export class Location {
 
   @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
   updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at', nullable: true })
+  deletedAt: Date | null;
+
+  @Column({ type: 'jsonb', default: {} })
+  metadata: Record<string, any>;
 }

@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Job } from './job.entity';
 import { ConversationParticipant } from './conversation-participant.entity';
 import { Message } from './message.entity';
@@ -12,7 +12,7 @@ export class Conversation {
   @Index()
   jobId: string | null;
 
-  @ManyToOne(() => Job, { onDelete: 'SET NULL' })
+  @ManyToOne(() => Job, (j) => j.conversations, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'job_id' })
   job: Job | null;
 
@@ -22,6 +22,12 @@ export class Conversation {
 
   @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
   updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at', nullable: true })
+  deletedAt: Date | null;
+
+  @Column({ type: 'jsonb', default: {} })
+  metadata: Record<string, any>;
 
   @OneToMany(() => ConversationParticipant, (p) => p.conversation)
   participants: ConversationParticipant[];
